@@ -1,0 +1,13 @@
+{
+  "name": "2f2c/jumponit",
+  "description": "Ce module trie les produits en fonction de la localisation du client",
+  "autoload": {
+    "psr-4": {
+      "JumpOnIt\\": "src/"
+    }
+  },
+  "config": {
+    "prepend-autoloader": false
+  },
+  "type": "prestashop-module"
+}
