@@ -82,9 +82,36 @@ class JumpOnIt extends Module
     }
     */
 
-    public function hookFilterProductSearch(array $params)
+    public function hookFilterProductSearch(array &$params)
     {
-        dump($params);
+        // Check if position filter is on
+
+        // [ ... ]
+
+        // Get $sellers from this position
+        // TODO : Seller::getSellersByLocation($zipcode)
+
+        $sellers = Seller::getSellers((int)Context::getContext()->shop->id);
+        $selectedSellers = [];
+
+        foreach ($sellers as $seller) {
+            if ($seller['postcode'] == '84120') {
+                $selectedSellers[] = $seller['id_seller'];
+            }
+        }
+
+        // Update &$params and unset those with wrong location
+
+        $products = $params['searchVariables']['products'];
+
+        foreach ($products as $key => $product) {
+            $seller_id = Seller::getSellerByProduct($product->getId());
+
+        }
+
+        echo '<pre>';
+        dump($selectedSellers);
+        echo '</pre>';
     }
 
     public function isUsingNewTranslationSystem()
