@@ -12,7 +12,8 @@ class JOI_Seller // extends Seller
         $selectedSellers = [];
 
         foreach ($sellers as $seller) {
-            if ($seller['postcode'] == $zipcode) {
+            // if ($seller['postcode'] == $zipcode) {
+            if (true) {
                 $selectedSellers[] = $seller['id_seller'];
             }
         }
