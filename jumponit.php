@@ -28,6 +28,8 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+require_once 'classes/Seller.php';
+
 class JumpOnIt extends Module
 {
 
@@ -62,9 +64,12 @@ class JumpOnIt extends Module
 
     public function install()
     {
+        # TODO : Check if JAMarkeplace is installed before installing this one.
+
         return parent::install()
             // && $this->registerHook('filterCategoryContent')
             && $this->registerHook('filterProductSearch')
+            && $this->registerHook('productSearchProvider')
             ;
     }
 
@@ -73,14 +78,23 @@ class JumpOnIt extends Module
         return parent::uninstall()
             // && $this->unregisterHook('filterCategoryContent')
             && $this->unregisterHook('filterProductSearch')
+            && $this->unregisterHook('productSearchProvider')
             ;
     }
+
     /*
     public function hookFilterCategoryContent(array $params)
     {
         dump($params);
     }
     */
+
+    public function hookProductSearchProvider($params) {
+        dump($params);
+        $product_list = new \PrestaShop\PrestaShop\Core\Product\Search\ProductSearchResult();
+        return $product_list->setProducts([['id_product' => 35]]);
+    }
+
 
     public function hookFilterProductSearch(array &$params)
     {
@@ -91,14 +105,13 @@ class JumpOnIt extends Module
         // Get $sellers from this position
         // TODO : Seller::getSellersByLocation($zipcode)
 
-        $sellers = Seller::getSellers((int)Context::getContext()->shop->id);
-        $selectedSellers = [];
+        // Instead
 
-        foreach ($sellers as $seller) {
-            if ($seller['postcode'] == '84120') {
-                $selectedSellers[] = $seller['id_seller'];
-            }
-        }
+        /*
+        $sellers = Seller::getSellers((int)Context::getContext()->shop->id);
+        $selectedSellers = JOI_Seller::getSellersByLocation('75014', $sellers);
+
+        // End of Instead
 
         // Update &$params and unset those with wrong location
 
@@ -107,11 +120,13 @@ class JumpOnIt extends Module
         foreach ($products as $key => $product) {
             $seller_id = Seller::getSellerByProduct($product->getId());
 
+            if (!in_array($seller_id, $selectedSellers)) {
+                unset($params['searchVariables']['products'][$key]);
+            }
         }
 
-        echo '<pre>';
-        dump($selectedSellers);
-        echo '</pre>';
+        dump($params);
+        */
     }
 
     public function isUsingNewTranslationSystem()
