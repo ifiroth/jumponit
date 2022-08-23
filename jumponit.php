@@ -28,8 +28,9 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-require_once 'classes/Seller.php';
-require_once 'classes/JOI_facetedSearchProductSearchProvider.php';
+use JOI\Service\SqlManager;
+
+require_once __DIR__.'/vendor/autoload.php';
 
 class JumpOnIt extends Module
 {
@@ -52,10 +53,12 @@ class JumpOnIt extends Module
 
         parent::__construct();
 
-        $this->displayName = $this->trans('Get the best opportunties next to you !', [], 'Modules.JumpOnIt.General');
+        $this->displayName = $this->trans('Jump on the best opportunities close to you !', [], 'Modules.JumpOnIt.General');
         $this->description = $this->trans('This module filter those products to show the closests ones.', [], 'Modules.JumpOnIt.General');
 
         $this->confirmUninstall = $this->trans('Are you sure that you want to uninstall ?', [], 'Modules.JumpOnIt.General');
+
+        $this->sqlManager = new SqlManager();
     }
 
     public function initContent()
@@ -65,10 +68,11 @@ class JumpOnIt extends Module
 
     public function install()
     {
-        if (Module::isEnabled('jmarketplace'))
+        if (Module::isInstalled('jmarketplace') && Module::isEnabled('jmarketplace'))
         {
             return parent::install()
                 // && $this->registerHook('filterCategoryContent')
+                && $this->sqlManager->updateProduct()
                 && $this->registerHook('filterProductSearch')
                 && $this->registerHook('productSearchProvider')
                 && $this->registerHook('actionProductSave')
@@ -83,6 +87,7 @@ class JumpOnIt extends Module
     {
         return parent::uninstall()
             // && $this->unregisterHook('filterCategoryContent')
+            && $this->sqlManager->rebuildProduct()
             && $this->unregisterHook('filterProductSearch')
             && $this->unregisterHook('productSearchProvider')
             && $this->unregisterHook('actionProductSave')
@@ -101,10 +106,10 @@ class JumpOnIt extends Module
     }
 
     public function hookProductSearchProvider(&$params) {
-
-
+        /*
         $query = $params['query'];
         return new JOI_facetedSearchProductSearchProvider($this);
+        */
     }
 
     public function hookFilterProductSearch(array &$params)
@@ -117,7 +122,7 @@ class JumpOnIt extends Module
         // TODO : Seller::getSellersByLocation($zipcode)
 
         // Instead
-
+    /*
 
         $sellers = Seller::getSellers((int)Context::getContext()->shop->id);
         $selectedSellers = JOI_Seller::getSellersByLocation('75014', $sellers);
@@ -135,7 +140,7 @@ class JumpOnIt extends Module
                 unset($params['searchVariables']['products'][$key]);
             }
         }
-
+*/
         //dump($params['searchVariables']['products']);
 
     }

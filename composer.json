@@ -3,7 +3,7 @@
   "description": "Ce module trie les produits en fonction de la localisation du client",
   "autoload": {
     "psr-4": {
-      "JumpOnIt\\": "src/"
+      "JOI\\": "src/"
     }
   },
   "config": {
