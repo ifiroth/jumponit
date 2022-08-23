@@ -28,13 +28,16 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+define('_MOD_PREFIX_', 'JOI_');
+
 use JOI\Service\SqlManager;
+use JOI\Service\FeatureManager;
+use JOI\Service\ProductManager;
 
 require_once __DIR__.'/vendor/autoload.php';
 
 class JumpOnIt extends Module
 {
-
     public function __construct()
     {
         $this->name = 'jumponit';
@@ -59,6 +62,8 @@ class JumpOnIt extends Module
         $this->confirmUninstall = $this->trans('Are you sure that you want to uninstall ?', [], 'Modules.JumpOnIt.General');
 
         $this->sqlManager = new SqlManager();
+        $this->featureManager = new FeatureManager();
+        $this->productManager = new ProductManager();
     }
 
     public function initContent()
@@ -72,7 +77,8 @@ class JumpOnIt extends Module
         {
             return parent::install()
                 // && $this->registerHook('filterCategoryContent')
-                && $this->sqlManager->updateProduct()
+                && $this->sqlManager->insertTown()
+                && $this->featureManager->initFeature()
                 && $this->registerHook('filterProductSearch')
                 && $this->registerHook('productSearchProvider')
                 && $this->registerHook('actionProductSave')
@@ -87,13 +93,27 @@ class JumpOnIt extends Module
     {
         return parent::uninstall()
             // && $this->unregisterHook('filterCategoryContent')
-            && $this->sqlManager->rebuildProduct()
+            && $this->sqlManager->deleteTown()
+            && $this->featureManager->deleteFeature()
             && $this->unregisterHook('filterProductSearch')
             && $this->unregisterHook('productSearchProvider')
             && $this->unregisterHook('actionProductSave')
             ;
     }
 
+    public function getContent() {
+
+        $notLocatedProducts = $this->productManager->setLocationToProducts();
+
+        $output = 'Id de l\'attribut : '. Configuration::get(_MOD_PREFIX_.'feature_id') .'<br>';
+        $output .= 'Produits non localisés : <br>';
+
+        foreach ($notLocatedProducts as $value) {
+            $output .= $value['id_product'] .' - '. $value['name']. ' - '. $value['city'] .'<br>';
+        }
+
+        return $output;
+    }
 
     public function hookFilterCategoryContent(array $params)
     {
