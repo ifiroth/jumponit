@@ -3,6 +3,7 @@
 namespace JOI\Service;
 
 use PrestaShop\PrestaShop\Adapter\Entity\Product;
+use JOI\Service\Debug;
 
 class ProductManager {
 
@@ -17,7 +18,7 @@ class ProductManager {
 
         $products = \Db::getInstance()->executeS($sql);
 
-        // TODO : innerjoin product w/out city as feature
+        // TODO : innerjoin product w/out city as feature to avoid and override by SetLocationToProducts()
 
         return $products;
     }
@@ -30,19 +31,22 @@ class ProductManager {
         foreach ($products as $product) {
 
             // Si la feature n'existe pas, on la crée
-            if (!FeatureManager::hasValue($product['city'])) {
+            $hasValueId = FeatureManager::hasValueId($product['city']);
+
+            if (!$hasValueId) {
 
                 $id_feature_value = FeatureManager::createValue($product['city']);
 
             // Sinon, on récupère juste son id
             } else {
 
-                $id_feature_value = FeatureManager::getValueId($product['city']);
+                $id_feature_value = $hasValueId;
             }
 
             // Une fois qu'on a toutes les infos, on peut lier le produit à son attribut.
-            Product::addFeatureProductImport($product['city'], $id_feature, $id_feature_value);
-        }
+            Product::addFeatureProductImport($product['id_product'], (int) $id_feature, (int) $id_feature_value);
+
+            }
 
         return $this->getNotLocatedProducts();
     }

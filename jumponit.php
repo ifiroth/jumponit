@@ -76,12 +76,13 @@ class JumpOnIt extends Module
         if (Module::isInstalled('jmarketplace') && Module::isEnabled('jmarketplace'))
         {
             return parent::install()
-                // && $this->registerHook('filterCategoryContent')
+
                 && $this->sqlManager->insertTown()
                 && $this->featureManager->initFeature()
-                && $this->registerHook('filterProductSearch')
-                && $this->registerHook('productSearchProvider')
-                && $this->registerHook('actionProductSave')
+                //&& $this->registerHook('filterCategoryContent')
+                //&& $this->registerHook('filterProductSearch')
+                //&& $this->registerHook('productSearchProvider')
+                //&& $this->registerHook('actionProductSave')
                 ;
 
         } else {
@@ -92,12 +93,13 @@ class JumpOnIt extends Module
     public function uninstall()
     {
         return parent::uninstall()
-            // && $this->unregisterHook('filterCategoryContent')
+
             && $this->sqlManager->deleteTown()
             && $this->featureManager->deleteFeature()
-            && $this->unregisterHook('filterProductSearch')
-            && $this->unregisterHook('productSearchProvider')
-            && $this->unregisterHook('actionProductSave')
+            //&& $this->unregisterHook('filterCategoryContent')
+            //&& $this->unregisterHook('filterProductSearch')
+            //&& $this->unregisterHook('productSearchProvider')
+            //&& $this->unregisterHook('actionProductSave')
             ;
     }
 
@@ -115,23 +117,29 @@ class JumpOnIt extends Module
         return $output;
     }
 
+    /*
     public function hookFilterCategoryContent(array $params)
     {
-        //dump($params);
+        dump($params);
     }
+    */
 
+    /*
     public function hookActionProductSave(array $params)
     {
         //dump($params);
     }
+    */
 
+    /*
     public function hookProductSearchProvider(&$params) {
-        /*
+
         $query = $params['query'];
         return new JOI_facetedSearchProductSearchProvider($this);
-        */
     }
+    */
 
+    /*
     public function hookFilterProductSearch(array &$params)
     {
         // Check if position filter is on
@@ -142,7 +150,7 @@ class JumpOnIt extends Module
         // TODO : Seller::getSellersByLocation($zipcode)
 
         // Instead
-    /*
+
 
         $sellers = Seller::getSellers((int)Context::getContext()->shop->id);
         $selectedSellers = JOI_Seller::getSellersByLocation('75014', $sellers);
@@ -160,10 +168,12 @@ class JumpOnIt extends Module
                 unset($params['searchVariables']['products'][$key]);
             }
         }
-*/
-        //dump($params['searchVariables']['products']);
+
+
+        //dump($params);
 
     }
+    */
 
     public function isUsingNewTranslationSystem()
     {
