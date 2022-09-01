@@ -5,7 +5,7 @@ namespace JOI\Service;
 class Debug {
     public static $id = 0;
 
-    private static function getMargin($margin = '100px'): string {
+    private static function getMargin($margin = '200px'): string {
         if (self::$id == 0) {
             $marginTop = '200px';
             self::$id++;

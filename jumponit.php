@@ -111,7 +111,7 @@ class JumpOnIt extends Module
         $output .= 'Produits non localisés : <br>';
 
         foreach ($notLocatedProducts as $value) {
-            $output .= $value['id_product'] .' - '. $value['name']. ' - '. $value['city'] .'<br>';
+            $output .= $value['id_product'] .' - '. $value['name']. ' - '. $value['city'] .' - '. $value['id_feature_value'] .'<br>';
         }
 
         return $output;

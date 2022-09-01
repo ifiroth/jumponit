@@ -10,17 +10,18 @@ class ProductManager {
     public function getNotLocatedProducts(): ?array {
 
         $sql = new \DbQuery();
-        $sql->select('p.`id_product`, s.`name`, s.`city`');
+
+        $sql->select('p.`id_product`, s.`name`, s.`city`, fp.`id_feature_value`');
         $sql->from('product', 'p');
         $sql->innerJoin('seller_product', 'sp', 'p.`id_product` = sp.`id_product`');
         $sql->innerJoin('seller', 's', 'sp.`id_seller` = s.`id_seller`');
+        $sql->leftJoin('feature_product', 'fp', 'fp.`id_product` = p.`id_product`');
+        $sql->where('fp.`id_feature_value` IS NULL');
         $sql->orderBy('p.`id_product`');
 
         $products = \Db::getInstance()->executeS($sql);
 
-        // TODO : innerjoin product w/out city as feature to avoid and override by SetLocationToProducts()
-
-        return $products;
+        return $products ?: null;
     }
 
     public function setLocationToProducts($products = null) : ?array {
@@ -30,23 +31,27 @@ class ProductManager {
 
         foreach ($products as $product) {
 
-            // Si la feature n'existe pas, on la crée
+
             $hasValueId = FeatureManager::hasValueId($product['city']);
 
-            if (!$hasValueId) {
+            if ($product['city'] != '') {
 
-                $id_feature_value = FeatureManager::createValue($product['city']);
+                // Si la feature n'existe pas, on la crée
+                if (!$hasValueId) {
 
-            // Sinon, on récupère juste son id
-            } else {
+                    $id_feature_value = FeatureManager::createValue($product['city']);
 
-                $id_feature_value = $hasValueId;
+                // Sinon, on récupère juste son id
+                } else {
+
+                    $id_feature_value = $hasValueId;
+                }
+
+                // Une fois qu'on a toutes les infos, on peut lier le produit à son attribut.
+                Product::addFeatureProductImport($product['id_product'], (int) $id_feature, (int) $id_feature_value);
+
             }
-
-            // Une fois qu'on a toutes les infos, on peut lier le produit à son attribut.
-            Product::addFeatureProductImport($product['id_product'], (int) $id_feature, (int) $id_feature_value);
-
-            }
+        }
 
         return $this->getNotLocatedProducts();
     }
