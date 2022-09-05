@@ -31,8 +31,10 @@ if (!defined('_PS_VERSION_')) {
 define('_MOD_PREFIX_', 'JOI_');
 
 use JOI\Service\SqlManager;
+use JOI\Service\TabManager;
 use JOI\Service\FeatureManager;
 use JOI\Service\ProductManager;
+use Prestashop\Prestashop\Adatper\SymfonyContainer;
 
 require_once __DIR__.'/vendor/autoload.php';
 
@@ -56,14 +58,24 @@ class JumpOnIt extends Module
 
         parent::__construct();
 
+        \Configuration::updateValue(_MOD_PREFIX_.'module_name', $this->name);
+
         $this->displayName = $this->trans('Jump on the best opportunities close to you !', [], 'Modules.JumpOnIt.General');
         $this->description = $this->trans('This module filter those products to show the closests ones.', [], 'Modules.JumpOnIt.General');
 
         $this->confirmUninstall = $this->trans('Are you sure that you want to uninstall ?', [], 'Modules.JumpOnIt.General');
 
-        $this->sqlManager = new SqlManager();
+        // $this->sqlManager = new SqlManager();
+        $this->tabManager = new TabManager();
         $this->featureManager = new FeatureManager();
         $this->productManager = new ProductManager();
+    }
+
+    public function generateControllerURI()
+    {
+        $router = SymfonyContainer::getInstance()->get('router');
+
+        return $router->generate('joi_admin');
     }
 
     public function initContent()
@@ -77,7 +89,8 @@ class JumpOnIt extends Module
         {
             return parent::install()
 
-                && $this->sqlManager->insertTown()
+                //&& $this->sqlManager->insertTown()
+                && $this->tabManager->install()
                 && $this->featureManager->initFeature()
                 //&& $this->registerHook('filterCategoryContent')
                 //&& $this->registerHook('filterProductSearch')
@@ -94,7 +107,8 @@ class JumpOnIt extends Module
     {
         return parent::uninstall()
 
-            && $this->sqlManager->deleteTown()
+            //&& $this->sqlManager->deleteTown()
+            && $this->tabManager->uninstall()
             && $this->featureManager->deleteFeature()
             //&& $this->unregisterHook('filterCategoryContent')
             //&& $this->unregisterHook('filterProductSearch')
@@ -105,14 +119,7 @@ class JumpOnIt extends Module
 
     public function getContent() {
 
-        $notLocatedProducts = $this->productManager->setLocationToProducts();
-
         $output = 'Id de l\'attribut : '. Configuration::get(_MOD_PREFIX_.'feature_id') .'<br>';
-        $output .= 'Produits non localisés : <br>';
-
-        foreach ($notLocatedProducts as $value) {
-            $output .= $value['id_product'] .' - '. $value['name']. ' - '. $value['city'] .' - '. $value['id_feature_value'] .'<br>';
-        }
 
         return $output;
     }

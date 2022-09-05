@@ -1,0 +1,18 @@
+{% extends "PrestaShopBundle:Admin:layout.html.twig" %}
+
+{% block content %}
+    <section class="card">
+        {% if title is defined %}
+            <h2 class="card-header">{{ title }}</h2>
+        {% else %}
+            <h2 class="card-header">Localisation des produits : Détail des produits</h2>
+        {% endif %}
+        {% block main %}
+            {{ dump(nonLocatedProducts) }}
+        {% endblock %}
+    </section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}

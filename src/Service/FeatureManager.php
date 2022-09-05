@@ -8,7 +8,6 @@ class FeatureManager {
     static private $id;
     static private $lang_id;
 
-
     public function __construct() {
 
         $this->context = \Context::getContext();
@@ -27,6 +26,7 @@ class FeatureManager {
 
         return $result;
     }
+
     public function deleteFeature() : bool {
 
         if (self::$id) {

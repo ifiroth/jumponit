@@ -1,0 +1,39 @@
+{% extends "PrestaShopBundle:Admin:layout.html.twig" %}
+
+{% block content %}
+    <section class="card">
+        {% if title is defined %}
+            <h2 class="card-header">{{ title }}</h2>
+        {% else %}
+            <h2 class="card-header">Administration du module Jump on It</h2>
+        {% endif %}
+        {% block main %}
+            <div class="d-flex">
+                <ul class="list-group d-inline-block m-2 align-top">
+                    <li class="list-group-item lead font-weight-bold">Santé des données</li>
+                    <li class="list-group-item list-group-item-action " >
+                        <a href="{{ path('joi_admin_product_detail') }}">Produits non localisés</a>
+                        <span class="badge badge-danger badge-pill">{{ nonLocatedProducts|length }}</span>
+                    </li>
+                    <li class="list-group-item list-group-item-action text-success" >{{ nonLocatedSellers|length }} Vendeur non localisé</li>
+                    <li class="list-group-item list-group-item-action " >X Villes répertoriées</li>
+                    <hr>
+                    <li class="list-group-item lead font-weight-bold">Actions rapides</li>
+                    <li class="list-group-item list-group-item-action" href="{{ path('joi_admin_product_refresh') }}">Localiser les produits non répertoriés</li>
+                    <li class="list-group-item list-group-item-action disabled" >Envoyer un rappel aux vendeurs - Dernier rappel le 01/01/01</li>
+                </ul>
+                <ul class="list-group d-inline-block m-2 align-top">
+                    <li class="list-group-item lead font-weight-bold">Opération sur les filtres</li>
+                    <li class="list-group-item list-group-item-action disabled" >Désactiver des villes</li>
+                    <li class="list-group-item list-group-item-action" >Item B</li>
+                    <li class="list-group-item list-group-item-action" >Item C</li>
+                    <li class="list-group-item list-group-item-action" >Item D</li>
+                </ul>
+            </div>
+        {% endblock %}
+    </section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}

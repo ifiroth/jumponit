@@ -24,13 +24,13 @@ class ProductManager {
         return $products ?: null;
     }
 
-    public function setLocationToProducts($products = null) : ?array {
+    public function setLocationToProducts($products = null) : int {
 
+        $i = 0;
         $products = ($products == null) ? $this->getNotLocatedProducts() : $products;
         $id_feature = \Configuration::get(_MOD_PREFIX_.'feature_id');
 
         foreach ($products as $product) {
-
 
             $hasValueId = FeatureManager::hasValueId($product['city']);
 
@@ -49,10 +49,11 @@ class ProductManager {
 
                 // Une fois qu'on a toutes les infos, on peut lier le produit à son attribut.
                 Product::addFeatureProductImport($product['id_product'], (int) $id_feature, (int) $id_feature_value);
+                $i++;
 
             }
         }
 
-        return $this->getNotLocatedProducts();
+        return $i;
     }
 }

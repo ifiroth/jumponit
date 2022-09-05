@@ -1,0 +1,29 @@
+joi_admin:
+  path: joi/admin
+  methods: [GET]
+  defaults:
+    _controller: 'JOI\Controller\Admin\IndexController::indexAction'
+
+joi_admin_product_refresh:
+  path: joi/admin/product/refresh
+  methods: [ GET ]
+  defaults:
+    _controller: 'JOI\Controller\Admin\Product\IndexController::refreshAction'
+
+joi_admin_product_detail:
+  path: joi/admin/product/detail
+  methods: [ GET ]
+  defaults:
+    _controller: 'JOI\Controller\Admin\Product\IndexController::detailAction'
+
+joi_admin_seller_refresh:
+  path: joi/admin/seller/refresh
+  methods: [ GET ]
+  defaults:
+    _controller: 'JOI\Controller\Admin\Seller\IndexController::refreshAction'
+
+joi_admin_seller_detail:
+  path: joi/admin/seller/detail
+  methods: [ GET ]
+  defaults:
+    _controller: 'JOI\Controller\Admin\Seller\IndexController::detailAction'
