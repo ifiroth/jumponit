@@ -7,14 +7,17 @@ use JOI\Service\Debug;
 
 class ProductManager {
 
-    public function getNotLocatedProducts(): ?array {
+    static public function getNotLocatedProducts(): ?array {
+
+        $lang_id = (int) \Configuration::get('PS_LANG_DEFAULT');
 
         $sql = new \DbQuery();
 
-        $sql->select('p.`id_product`, s.`name`, s.`city`, fp.`id_feature_value`');
+        $sql->select('p.`id_product`, s.`name` as seller_name, s.`city`, fp.`id_feature_value`, pl.`name` as product_name');
         $sql->from('product', 'p');
         $sql->innerJoin('seller_product', 'sp', 'p.`id_product` = sp.`id_product`');
         $sql->innerJoin('seller', 's', 'sp.`id_seller` = s.`id_seller`');
+        $sql->innerJoin('product_lang', 'pl', 'pl.`id_product` = p.`id_product` AND pl.`id_lang` = '. $lang_id);
         $sql->leftJoin('feature_product', 'fp', 'fp.`id_product` = p.`id_product`');
         $sql->where('fp.`id_feature_value` IS NULL');
         $sql->orderBy('p.`id_product`');
@@ -24,35 +27,42 @@ class ProductManager {
         return $products ?: null;
     }
 
-    public function setLocationToProducts($products = null) : int {
+    static public function setLocationToProducts($products = null) : int {
 
         $i = 0;
-        $products = ($products == null) ? $this->getNotLocatedProducts() : $products;
-        $id_feature = \Configuration::get(_MOD_PREFIX_.'feature_id');
 
-        foreach ($products as $product) {
+        $products = ($products == null) ? self::getNotLocatedProducts() : $products;
+        $mod_prefix = \Configuration::get('module_prefix');
+        $id_feature = \Configuration::get($mod_prefix .'feature_id');
 
-            $hasValueId = FeatureManager::hasValueId($product['city']);
+        \Configuration::updateValue($mod_prefix .'last_feature_value_import', 'today');
 
-            if ($product['city'] != '') {
+        if ($products) {
+            foreach ($products as $product) {
 
-                // Si la feature n'existe pas, on la crée
-                if (!$hasValueId) {
+                $hasValueId = FeatureManager::hasValueId($product['city']);
 
-                    $id_feature_value = FeatureManager::createValue($product['city']);
+                if ($product['city'] != '') {
 
-                // Sinon, on récupère juste son id
-                } else {
+                    // Si la feature n'existe pas, on la crée
+                    if (!$hasValueId) {
 
-                    $id_feature_value = $hasValueId;
+                        $id_feature_value = FeatureManager::createValue($product['city']);
+
+                        // Sinon, on récupère juste son id
+                    } else {
+
+                        $id_feature_value = $hasValueId;
+                    }
+
+                    // Une fois qu'on a toutes les infos, on peut lier le produit à son attribut.
+                    Product::addFeatureProductImport($product['id_product'], (int) $id_feature, (int) $id_feature_value);
+                    $i++;
+
                 }
-
-                // Une fois qu'on a toutes les infos, on peut lier le produit à son attribut.
-                Product::addFeatureProductImport($product['id_product'], (int) $id_feature, (int) $id_feature_value);
-                $i++;
-
             }
         }
+
 
         return $i;
     }

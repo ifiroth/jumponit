@@ -1,0 +1,21 @@
+{% from "@Modules/jumponit/template/admin/utils/isActive.twig" import isActive %}
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link{{ isActive('index', action) }}" href="{{ path('joi_admin') }}">Accueil</a>
+    </li>
+    {# EXEMPLE DROP DOWN
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle{{ isActive('pickup', action) }}" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Collecte</a>
+        <div class="dropdown-menu">
+            <a class="dropdown-item" href="{{ path('cml_admin_pickup') }}">A venir</a>
+            <a class="dropdown-item" href="{{ path('cml_admin_pickup_archived') }}">Archives</a>
+        </div>
+    </li>
+    #}
+    <li class="nav-item">
+        <a class="nav-link{{ isActive('product', action) }}" href="{{ path('joi_admin_product_detail') }}">Localisations</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link{{ isActive('seller', action) }}" href="{{ path('joi_admin_seller_detail') }}">Vendeurs</a>
+    </li>
+</ul>

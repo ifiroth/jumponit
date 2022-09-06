@@ -58,14 +58,17 @@ class JumpOnIt extends Module
 
         parent::__construct();
 
+        \Configuration::updateValue('module_prefix', _MOD_PREFIX_);
         \Configuration::updateValue(_MOD_PREFIX_.'module_name', $this->name);
+        \Configuration::updateValue(_MOD_PREFIX_.'feature_label', "Ville");
+        \Configuration::updateValue(_MOD_PREFIX_.'last_imported_feature_value', false);
 
         $this->displayName = $this->trans('Jump on the best opportunities close to you !', [], 'Modules.JumpOnIt.General');
         $this->description = $this->trans('This module filter those products to show the closests ones.', [], 'Modules.JumpOnIt.General');
 
         $this->confirmUninstall = $this->trans('Are you sure that you want to uninstall ?', [], 'Modules.JumpOnIt.General');
 
-        // $this->sqlManager = new SqlManager();
+        $this->sqlManager = new SqlManager();
         $this->tabManager = new TabManager();
         $this->featureManager = new FeatureManager();
         $this->productManager = new ProductManager();
@@ -89,7 +92,7 @@ class JumpOnIt extends Module
         {
             return parent::install()
 
-                //&& $this->sqlManager->insertTown()
+                && $this->sqlManager->install()
                 && $this->tabManager->install()
                 && $this->featureManager->initFeature()
                 //&& $this->registerHook('filterCategoryContent')
@@ -107,13 +110,13 @@ class JumpOnIt extends Module
     {
         return parent::uninstall()
 
-            //&& $this->sqlManager->deleteTown()
+            && $this->sqlManager->uninstall()
             && $this->tabManager->uninstall()
             && $this->featureManager->deleteFeature()
             //&& $this->unregisterHook('filterCategoryContent')
             //&& $this->unregisterHook('filterProductSearch')
             //&& $this->unregisterHook('productSearchProvider')
-            //&& $this->unregisterHook('actionProductSave')
+            && $this->unregisterHook('actionProductSave')
             ;
     }
 
@@ -131,12 +134,12 @@ class JumpOnIt extends Module
     }
     */
 
-    /*
     public function hookActionProductSave(array $params)
     {
-        //dump($params);
+        // TODO : Check for city and add feature_value in case
+
+        dump($params);
     }
-    */
 
     /*
     public function hookProductSearchProvider(&$params) {

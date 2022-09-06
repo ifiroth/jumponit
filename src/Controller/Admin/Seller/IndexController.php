@@ -2,6 +2,7 @@
 
 namespace JOI\Controller\Admin\Seller;
 
+use JOI\Service\CityManager;
 use JOI\Service\SellerManager;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,8 +19,12 @@ class IndexController extends FrameworkBundleAdminController
 
     public function detailAction() : Response
     {
+        $cityManager = new CityManager();
+
         return $this->render('@Modules/jumponit/template/admin/seller/index.html.twig', [
-            'nonLocatedSellers' => SellerManager::getNotLocatedSellers(),
+            'notLocatedSellers' => SellerManager::getNotLocatedSellers(),
+            'cities' => $cityManager->getCities(),
+            'action' => 'seller',
         ]);
     }
 }

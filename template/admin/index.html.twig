@@ -1,6 +1,7 @@
 {% extends "PrestaShopBundle:Admin:layout.html.twig" %}
 
 {% block content %}
+    {{ include('@Modules/jumponit/template/admin/menu.html.twig') }}
     <section class="card">
         {% if title is defined %}
             <h2 class="card-header">{{ title }}</h2>
@@ -8,19 +9,43 @@
             <h2 class="card-header">Administration du module Jump on It</h2>
         {% endif %}
         {% block main %}
+            {% if not last_imported_feature_value %}
+                <div class="alert alert-warning">
+                    Vous n'avez pas encore contrôler la localisation des produits. Veuillez
+                    <a href="{{ path('joi_admin_product_refresh') }}">localiser les produits non répertoriés</a>.
+                    {{ dump(last_imported_feature_value) }}
+                </div>
+            {% endif %}
             <div class="d-flex">
                 <ul class="list-group d-inline-block m-2 align-top">
                     <li class="list-group-item lead font-weight-bold">Santé des données</li>
                     <li class="list-group-item list-group-item-action " >
-                        <a href="{{ path('joi_admin_product_detail') }}">Produits non localisés</a>
-                        <span class="badge badge-danger badge-pill">{{ nonLocatedProducts|length }}</span>
+                        <a href="{{ path('joi_admin_product_detail') }}">
+                            Produits non localisés
+                        </a>
+                        <span class="badge badge-danger badge-pill">{{ notLocatedProducts|length }}</span>
                     </li>
-                    <li class="list-group-item list-group-item-action text-success" >{{ nonLocatedSellers|length }} Vendeur non localisé</li>
-                    <li class="list-group-item list-group-item-action " >X Villes répertoriées</li>
-                    <hr>
+                    <li class="list-group-item list-group-item-action text-warning" >
+                        <a href="{{ path('joi_admin_seller_detail') }}">
+                            Vendeur non localisé
+                        </a>
+                        <span class="badge badge-warning badge-pill">{{ notLocatedSellers|length }}</span>
+                    </li>
+                    <li class="list-group-item list-group-item-action " >{{ locations|length }} Villes répertoriées</li>
                     <li class="list-group-item lead font-weight-bold">Actions rapides</li>
-                    <li class="list-group-item list-group-item-action" href="{{ path('joi_admin_product_refresh') }}">Localiser les produits non répertoriés</li>
+                    <li class="list-group-item list-group-item-action">
+                        <a href="{{ path('joi_admin_product_refresh') }}">Localiser les produits non répertoriés</a>
+                    </li>
                     <li class="list-group-item list-group-item-action disabled" >Envoyer un rappel aux vendeurs - Dernier rappel le 01/01/01</li>
+                    <li class="list-group-item list-group-item-action disabled" >
+                        <form class="d-inline">
+                            <label for>Changer le nom de la caractéristique en </label>
+                            <select>
+                                <option>fr</option>
+                            </select>
+                            <input type="text" placeholder="{{ feature.name }}">
+                        </form>
+                    </li>
                 </ul>
                 <ul class="list-group d-inline-block m-2 align-top">
                     <li class="list-group-item lead font-weight-bold">Opération sur les filtres</li>

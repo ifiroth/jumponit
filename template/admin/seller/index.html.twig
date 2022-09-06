@@ -1,18 +1,32 @@
-{% extends "PrestaShopBundle:Admin:layout.html.twig" %}
+{% extends "@Modules/jumponit/template/admin/index.html.twig" %}
 
-{% block content %}
-    <section class="card">
-        {% if title is defined %}
-            <h2 class="card-header">{{ title }}</h2>
-        {% else %}
-            <h2 class="card-header">Localisation des produits : Détail des vendeurs</h2>
-        {% endif %}
-        {% block main %}
-            {{ dump(nonLocatedSellers) }}
-        {% endblock %}
-    </section>
-{% endblock %}
-
-{% block javascripts %}
-    {{ parent() }}
+{% block main %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Nom</th>
+                <th scope="col">Ville</th>
+                <th scope="col">Dernière action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for seller in notLocatedSellers %}
+            <tr>
+                <th scope="col">#</th>
+                <td>{{ seller.name }}</td>
+                <td class="d-inline-flex">
+                    <select class="custom-select">
+                        <option value="0" selected disabled>Sélectionner</option>
+                        {% for city in cities %}
+                        <option value="{{ city.id_feature_value }}">{{ city.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="submit" value="Attribuer">
+                </td>
+                <td>Dernière action</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}

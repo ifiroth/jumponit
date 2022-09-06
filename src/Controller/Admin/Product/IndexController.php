@@ -2,6 +2,7 @@
 
 namespace JOI\Controller\Admin\Product;
 
+use JOI\Service\CityManager;
 use JOI\Service\ProductManager;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,14 +15,36 @@ class IndexController extends FrameworkBundleAdminController
         // $em = $this->getDoctrine()->getManager();
         $productLocationsSet = ProductManager::setLocationToProducts();
 
-        $this->addFlash('success', $productLocationsSet .' vendeurs mis à jour');
+        switch ($productLocationsSet)
+        {
+            case 1:
+                $flash = 'success';
+                $message = $productLocationsSet .' produit mis à jour';
+                break;
+
+            case 0:
+                $flash = 'warning';
+                $message = 'Aucun produit mis à jour';
+                break;
+
+            default:
+                $flash = 'success';
+                $message = $productLocationsSet .' produits mis à jour';
+                break;
+        }
+
+        $this->addFlash($flash, $message);
         return $this->redirectToRoute('joi_admin');
     }
 
     public function detailAction() : Response
     {
-        return $this->render('@Modules/jumponit/template/admin/seller/index.html.twig', [
-            'nonLocatedSellers' => ProductManager::getNotLocatedProducts(),
+        $cityManager = new CityManager();
+
+        return $this->render('@Modules/jumponit/template/admin/product/index.html.twig', [
+            'notLocatedProducts' => ProductManager::getNotLocatedProducts(),
+            'action' => 'product',
+            'cities' => $cityManager->getCities(),
         ]);
     }
 }

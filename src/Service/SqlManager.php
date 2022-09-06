@@ -2,16 +2,41 @@
 
 namespace JOI\Service;
 
+use Db;
+
 class SqlManager {
-    public function insertTown()
+
+    public function install() {
+
+        $query = "
+        DROP TABLE IF EXISTS `". _DB_PREFIX_ ."enabled_city`;
+        CREATE TABLE IF NOT EXISTS `". _DB_PREFIX_ ."enabled_city` (
+            `id` int NOT NULL AUTO_INCREMENT,
+            `feature_value_id` int NOT NULL,
+            `isEnabled` bool NOT NULL,
+            PRIMARY KEY `id` (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        ";
+
+        return Db::getInstance()->execute($query);
+    }
+
+    public function uninstall() {
+        return Db::getInstance()->execute(
+            'DROP TABLE IF EXISTS `'. _DB_PREFIX_ .'enabled_city`;'
+        );
+    }
+
+    public function enableCity()
     {
-        // TODO : insertTown()
+
 
         return true;
     }
-    public function deleteTown()
+
+    public function disableCity()
     {
-        // TODO : deleteTown()
+
 
         return true;
     }

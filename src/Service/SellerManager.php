@@ -8,14 +8,14 @@ use JOI\Service\Debug;
 class SellerManager
 {
 
-    public function getNotLocatedSellers(): ?array
+    static public function getNotLocatedSellers(): ?array
     {
 
         $sql = new \DbQuery();
 
-        $sql->select('s.`id_seller`, s.`name`');
+        $sql->select('s.`id_seller`, s.`name`, s.`city`');
         $sql->from('seller', 's');
-        $sql->where('s.`city` IS NULL');
+        $sql->where('s.`city` = ""');
         $sql->orderBy('s.`name`');
 
         $sellers = \Db::getInstance()->executeS($sql);
