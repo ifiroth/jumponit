@@ -8,50 +8,53 @@ class SqlManager {
 
     public function install() {
 
-        $query = "
-        DROP TABLE IF EXISTS `". _DB_PREFIX_ ."enabled_city`;
-        CREATE TABLE IF NOT EXISTS `". _DB_PREFIX_ ."enabled_city` (
-            `id` int NOT NULL AUTO_INCREMENT,
-            `feature_value_id` int NOT NULL,
-            `isEnabled` bool NOT NULL,
-            PRIMARY KEY `id` (`id`)
+        $i = 0;
+
+        $sql[] = "
+        DROP TABLE IF EXISTS `". _DB_PREFIX_ ."joi_city`;
+        CREATE TABLE IF NOT EXISTS `". _DB_PREFIX_ ."joi_city` (
+            `id_city` int NOT NULL AUTO_INCREMENT,
+            `id_feature_value` int,
+            `postal_code` int NOY NULL,
+            `nom_comm` VARCHAR(255) NOT NULL,
+            PRIMARY KEY (`id_city`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
         ";
 
-        // TODO : Create log action table
+        // TODO : insert other fields from /utils/inseeCities.json
 
-        /*
-        $query .= "
+        $sql[] = "
         DROP TABLE IF EXISTS `". _DB_PREFIX_ ."joi_log_action`;
         CREATE TABLE IF NOT EXISTS `". _DB_PREFIX_ ."joi_log_action` (
-            `id` int NOT NULL AUTO_INCREMENT,
-            `action` int NOT NULL,
-            `timestamp` TIME NOT NULL,
-            PRIMARY KEY `id` (`id`)
+            `id_log_action` int NOT NULL AUTO_INCREMENT,
+            `action` VARCHAR(50) NOT NULL,
+            `value_before` VARCHAR(255) NOT NULL,
+            `value_after` VARCHAR(255) NOT NULL,
+            `selection` VARCHAR(255) NOT NULL,
+            `date_action` TIME NOT NULL,
+            PRIMARY KEY (`id_log_action`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
         ";
-        */
 
-        return Db::getInstance()->execute($query);
+        foreach ($sql as $query)
+        {
+            $result = Db::getInstance()->execute($query);
+
+            if ($result)
+            {
+                $i++;
+            } else {
+                dump($query);
+            }
+        }
+
+        return $i;
     }
 
     public function uninstall() {
         return Db::getInstance()->execute(
-            'DROP TABLE IF EXISTS `'. _DB_PREFIX_ .'enabled_city`;'
+            'DROP TABLE IF EXISTS `'. _DB_PREFIX_ .'joi_city`;'.
+            'DROP TABLE IF EXISTS `'. _DB_PREFIX_ .'joi_log_action`;'
         );
-    }
-
-    public function enableCity()
-    {
-
-
-        return true;
-    }
-
-    public function disableCity()
-    {
-
-
-        return true;
     }
 }

@@ -2,8 +2,6 @@
 
 namespace JOI\Service;
 
-use JOI\Service\Debug;
-
 class CityManager {
 
     public function __construct() {
@@ -20,13 +18,30 @@ class CityManager {
 
         $sql = new \DbQuery();
 
-        $sql->select('fv.`id_feature_value`, fvl.`value` as name');
-        $sql->from('feature_value', 'fv');
-        $sql->innerJoin('feature_value_lang', 'fvl', 'fv.`id_feature_value` = fvl.`id_feature_value`');
-        $sql->where('fvl.`id_lang` = '. $this->id_lang);
+        $sql->select('c.`id_feature_value`, c.`postal_code`, c.`nom_comm`');
+        $sql->from('joi_city', 'c');
 
         $cities = \Db::getInstance()->executeS($sql);
 
         return $cities ?: null;
+    }
+
+    public function importCities() : bool {
+
+        $mod_prefix = \Configuration::get('module_prefix');
+        \Configuration::updateValue($mod_prefix .'last_city_import', time());
+
+        $cityFile = file_get_contents(__DIR__ .'/../../utils/inseeCities.json');
+        $cities = json_decode($cityFile);
+
+        foreach ($cities as $city) {
+            $db = \Db::getInstance();
+            $result = $db->insert('joi_city', [
+                'postal_code' => (int) $city['postal_code'],
+                'nom_comm' => $city['nom_comm'],
+            ]);
+        }
+
+        return 'importation';
     }
 }

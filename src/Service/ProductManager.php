@@ -7,9 +7,15 @@ use JOI\Service\Debug;
 
 class ProductManager {
 
-    static public function getNotLocatedProducts(): ?array {
+    static public function getNotLocatedProducts($id_seller = null): ?array {
 
         $lang_id = (int) \Configuration::get('PS_LANG_DEFAULT');
+
+        if ($id_seller) {
+            $whereSeller = " AND s.`id_seller` = ". $id_seller;
+        } else {
+            $whereSeller = "";
+        }
 
         $sql = new \DbQuery();
 
@@ -19,7 +25,7 @@ class ProductManager {
         $sql->innerJoin('seller', 's', 'sp.`id_seller` = s.`id_seller`');
         $sql->innerJoin('product_lang', 'pl', 'pl.`id_product` = p.`id_product` AND pl.`id_lang` = '. $lang_id);
         $sql->leftJoin('feature_product', 'fp', 'fp.`id_product` = p.`id_product`');
-        $sql->where('fp.`id_feature_value` IS NULL');
+        $sql->where('fp.`id_feature_value` IS NULL'. $whereSeller);
         $sql->orderBy('p.`id_product`');
 
         $products = \Db::getInstance()->executeS($sql);
@@ -27,15 +33,11 @@ class ProductManager {
         return $products ?: null;
     }
 
-    static public function setLocationToProducts($seller = null) : int {
+    static public function setLocationToProducts($id_seller = null) : int {
 
         $i = 0;
 
-        if ($seller) {
-            
-        }
-
-        $products = ($products == null) ? self::getNotLocatedProducts() : $products;
+        $products = self::getNotLocatedProducts($id_seller);
         $mod_prefix = \Configuration::get('module_prefix');
         $id_feature = \Configuration::get($mod_prefix .'feature_id');
 

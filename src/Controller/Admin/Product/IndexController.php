@@ -10,10 +10,10 @@ use Symfony\Component\HttpFoundation\Response;
 class IndexController extends FrameworkBundleAdminController
 {
 
-    public function refreshAction() : Response
+    public function refreshAction($id_seller = null) : Response
     {
         // $em = $this->getDoctrine()->getManager();
-        $productLocationsSet = ProductManager::setLocationToProducts();
+        $productLocationsSet = ProductManager::setLocationToProducts($id_seller);
 
         switch ($productLocationsSet)
         {
@@ -33,35 +33,14 @@ class IndexController extends FrameworkBundleAdminController
                 break;
         }
 
-        $this->addFlash($flash, $message);
-        return $this->redirectToRoute('joi_admin');
-    }
-
-    public function refreshSingleAction($seller) : Response
-    {
-        $productLocationsSet = ProductManager::setLocationToProducts($seller);
-
-        switch ($productLocationsSet)
-        {
-            case 1:
-                $flash = 'success';
-                $message = $productLocationsSet .' produit mis à jour';
-                break;
-
-            case 0:
-                $flash = 'warning';
-                $message = 'Aucun produit mis à jour';
-                break;
-
-            default:
-                $flash = 'success';
-                $message = $productLocationsSet .' produits mis à jour';
-                break;
+        if ($id_seller) {
+            $redirectToRoute = 'joi_admin_seller_detail';
+        } else {
+            $redirectToRoute = 'joi_admin';
         }
 
         $this->addFlash($flash, $message);
-
-        return $this->redirectToRoute('joi_admin_seller_detail');
+        return $this->redirectToRoute($redirectToRoute);
     }
 
     public function detailAction() : Response

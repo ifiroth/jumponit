@@ -1,7 +1,6 @@
 {% extends "@Modules/jumponit/template/admin/index.html.twig" %}
 
 {% block main %}
-{{ dump(sellers) }}
     <table class="table">
         <thead>
             <tr>
@@ -31,7 +30,7 @@
                 <td>
                     {{ seller.product_not_located_count }}
                     <a
-                        href="{{ path('joi_admin_product_refresh', seller.id)}}"
+                        href="{{ path('joi_admin_product_refresh_single', {'id_seller': seller.id} ) }}"
                         type="submit" value="Localiser"
                         class="btn btn-outline-primary mx-1{% if not seller.product_not_located_count %} disabled {% endif %}"
                     >

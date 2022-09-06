@@ -40,6 +40,10 @@
                         <a href="{{ path('joi_admin_seller_general_warning') }}">Envoyer un rappel général aux vendeurs</a>
                         <small>{{ joi_sellers.last_seller_general_warning|date('j M') }}</small>
                     </li>
+                    <li class="list-group-item list-group-item-action d-flex justify-content-between">
+                        <a href="{{ path('joi_admin_city_import') }}">Importer les villes depuis l'INSEE</a>
+                        <small>{{ joi_cities.last_city_import|date('j M') }}</small>
+                    </li>
                     <li class="list-group-item list-group-item-action disabled" >
                         <form class="d-inline">
                             <label for>Changer le nom de la caractéristique en </label>

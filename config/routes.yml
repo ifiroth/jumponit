@@ -11,12 +11,12 @@ joi_admin_product_refresh:
     _controller: 'JOI\Controller\Admin\Product\IndexController::refreshAction'
 
 joi_admin_product_refresh_single:
-  path: joi/admin/product/refresh/{seller}
+  path: joi/admin/product/refresh/{id_seller}
   methods: [ GET ]
   defaults:
-    _controller: 'JOI\Controller\Admin\Product\IndexController::refreshSingleAction'
+    _controller: 'JOI\Controller\Admin\Product\IndexController::refreshAction'
   requirements:
-    seller: '\d+'
+    id_seller: '\d+'
 
 joi_admin_product_detail:
   path: joi/admin/product/detail
@@ -41,3 +41,15 @@ joi_admin_seller_general_warning:
   methods: [ GET ]
   defaults:
     _controller: 'JOI\Controller\Admin\Seller\IndexController::generalWarningAction'
+
+joi_admin_city_detail:
+    path: joi/admin/city/detail
+    methods: [ GET ]
+    defaults:
+        _controller: 'JOI\Controller\Admin\City\IndexController::detailAction'
+
+joi_admin_city_import:
+    path: joi/admin/city/import
+    methods: [ GET ]
+    defaults:
+        _controller: 'JOI\Controller\Admin\City\IndexController::importAction'

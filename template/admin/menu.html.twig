@@ -13,7 +13,10 @@
     </li>
     #}
     <li class="nav-item">
-        <a class="nav-link{{ isActive('product', action) }}" href="{{ path('joi_admin_product_detail') }}">Localisations</a>
+        <a class="nav-link{{ isActive('product', action) }}" href="{{ path('joi_admin_product_detail') }}">Produits</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link{{ isActive('city', action) }}" href="{{ path('joi_admin_city_detail') }}">Villes</a>
     </li>
     <li class="nav-item">
         <a class="nav-link{{ isActive('seller', action) }}" href="{{ path('joi_admin_seller_detail') }}">Vendeurs</a>

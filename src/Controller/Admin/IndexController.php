@@ -29,6 +29,10 @@ class IndexController extends FrameworkBundleAdminController
             'last_seller_general_warning' => \Configuration::get($this->mod_prefix .'last_seller_general_warning'),
         ];
 
+        $joi_cities = [
+            'last_city_import' => \Configuration::get($this->mod_prefix .'last_city_import'),
+        ];
+
         return $this->render('@Modules/jumponit/template/admin/index.html.twig', [
 
             'locations' => FeatureManager::countValue(),
@@ -36,6 +40,7 @@ class IndexController extends FrameworkBundleAdminController
             'action' => 'index',
             'joi_products' => $joi_products,
             'joi_sellers' => $joi_sellers,
+            'joi_cities' => $joi_cities,
         ]);
     }
 }

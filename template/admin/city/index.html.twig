@@ -1,0 +1,36 @@
+{% extends "@Modules/jumponit/template/admin/index.html.twig" %}
+
+{% block main %}
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Nom</th>
+            <th scope="col">Code postal</th>
+            <th scope="col">Produits</th>
+            <th scope="col">Vendeurs</th>
+            <th scope="col">Dernière action</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for product in notLocatedProducts %}
+            <tr>
+                <th scope="col">#</th>
+                <td>{{ city.product_name }}</td>
+                <td>{{ city.seller_name }}</td>
+                <td scope="col">Code postal</td>
+                <td class="d-inline-flex">
+                    <select class="custom-select">
+                        <option value="0" selected disabled>Sélectionner</option>
+                        {% for city in cities %}
+                            <option value="{{ city.id_feature_value }}">{{ city.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="submit" value="Attribuer">
+                </td>
+                <td>Dernière action</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

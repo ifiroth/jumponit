@@ -32,6 +32,7 @@ define('_MOD_PREFIX_', 'JOI_');
 
 use JOI\Service\SqlManager;
 use JOI\Service\TabManager;
+use JOI\Service\CityManager;
 use JOI\Service\FeatureManager;
 use JOI\Service\ProductManager;
 use Prestashop\Prestashop\Adatper\SymfonyContainer;
@@ -62,6 +63,8 @@ class JumpOnIt extends Module
         \Configuration::updateValue(_MOD_PREFIX_.'module_name', $this->name);
         \Configuration::updateValue(_MOD_PREFIX_.'feature_label', "Ville");
         \Configuration::updateValue(_MOD_PREFIX_.'last_imported_feature_value', false);
+        \Configuration::updateValue(_MOD_PREFIX_.'last_city_import', false);
+        \Configuration::updateValue(_MOD_PREFIX_.'last_seller_general_warning', false);
 
         $this->displayName = $this->trans('Jump on the best opportunities close to you !', [], 'Modules.JumpOnIt.General');
         $this->description = $this->trans('This module filter those products to show the closests ones.', [], 'Modules.JumpOnIt.General');
@@ -70,15 +73,9 @@ class JumpOnIt extends Module
 
         $this->sqlManager = new SqlManager();
         $this->tabManager = new TabManager();
+        $this->cityManager = new CityManager();
         $this->featureManager = new FeatureManager();
         $this->productManager = new ProductManager();
-    }
-
-    public function generateControllerURI()
-    {
-        $router = SymfonyContainer::getInstance()->get('router');
-
-        return $router->generate('joi_admin');
     }
 
     public function initContent()
@@ -92,9 +89,10 @@ class JumpOnIt extends Module
         {
             return parent::install()
 
-                && $this->sqlManager->install()
                 && $this->tabManager->install()
+                && $this->sqlManager->install()
                 && $this->featureManager->initFeature()
+                //&& $this->cityManager->importCities()
                 //&& $this->registerHook('filterCategoryContent')
                 //&& $this->registerHook('filterProductSearch')
                 //&& $this->registerHook('productSearchProvider')
@@ -110,8 +108,8 @@ class JumpOnIt extends Module
     {
         return parent::uninstall()
 
-            && $this->sqlManager->uninstall()
             && $this->tabManager->uninstall()
+            && $this->sqlManager->uninstall()
             && $this->featureManager->deleteFeature()
             //&& $this->unregisterHook('filterCategoryContent')
             //&& $this->unregisterHook('filterProductSearch')
