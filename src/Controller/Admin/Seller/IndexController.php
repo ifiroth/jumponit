@@ -9,6 +9,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class IndexController extends FrameworkBundleAdminController
 {
+    public function __construct()
+    {
+        $this->mod_prefix = \Configuration::get('module_prefix');
+    }
+
 
     public function refreshAction() : Response
     {
@@ -23,8 +28,22 @@ class IndexController extends FrameworkBundleAdminController
 
         return $this->render('@Modules/jumponit/template/admin/seller/index.html.twig', [
             'notLocatedSellers' => SellerManager::getNotLocatedSellers(),
+            'sellers' => SellerManager::getSellers(),
             'cities' => $cityManager->getCities(),
             'action' => 'seller',
         ]);
+    }
+
+    public function generalWarningAction() : Response
+    {
+        // TODO : Define generalWarningAction
+
+        $flash = 'warning';
+        $message = 'Fonction non programmée.';
+
+        \Configuration::updateValue($this->mod_prefix .'last_seller_general_warning', time());
+
+        $this->addFlash($flash, $message);
+        return $this->redirectToRoute('joi_admin');
     }
 }

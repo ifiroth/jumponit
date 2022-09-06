@@ -27,15 +27,19 @@ class ProductManager {
         return $products ?: null;
     }
 
-    static public function setLocationToProducts($products = null) : int {
+    static public function setLocationToProducts($seller = null) : int {
 
         $i = 0;
+
+        if ($seller) {
+            
+        }
 
         $products = ($products == null) ? self::getNotLocatedProducts() : $products;
         $mod_prefix = \Configuration::get('module_prefix');
         $id_feature = \Configuration::get($mod_prefix .'feature_id');
 
-        \Configuration::updateValue($mod_prefix .'last_feature_value_import', 'today');
+        \Configuration::updateValue($mod_prefix .'last_feature_value_import', time());
 
         if ($products) {
             foreach ($products as $product) {

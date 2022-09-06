@@ -19,14 +19,23 @@ class IndexController extends FrameworkBundleAdminController
     {
         // $em = $this->getDoctrine()->getManager();
 
-        return $this->render('@Modules/jumponit/template/admin/index.html.twig', [
+        $joi_products = [
             'notLocatedProducts' => ProductManager::getNotLocatedProducts(),
+            'last_feature_value_import' => \Configuration::get($this->mod_prefix .'last_feature_value_import'),
+        ];
+
+        $joi_sellers = [
             'notLocatedSellers' => SellerManager::getNotLocatedSellers(),
+            'last_seller_general_warning' => \Configuration::get($this->mod_prefix .'last_seller_general_warning'),
+        ];
+
+        return $this->render('@Modules/jumponit/template/admin/index.html.twig', [
+
             'locations' => FeatureManager::countValue(),
-            'seller' => SellerManager::getNotLocatedSellers(),
-            'last_imported_feature_value' => \Configuration::get($this->mod_prefix .'last_imported_feature'),
             'feature' => FeatureManager::getFeature(\Configuration::get($this->mod_prefix .'feature_id')),
             'action' => 'index',
+            'joi_products' => $joi_products,
+            'joi_sellers' => $joi_sellers,
         ]);
     }
 }

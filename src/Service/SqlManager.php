@@ -18,6 +18,20 @@ class SqlManager {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
         ";
 
+        // TODO : Create log action table
+
+        /*
+        $query .= "
+        DROP TABLE IF EXISTS `". _DB_PREFIX_ ."joi_log_action`;
+        CREATE TABLE IF NOT EXISTS `". _DB_PREFIX_ ."joi_log_action` (
+            `id` int NOT NULL AUTO_INCREMENT,
+            `action` int NOT NULL,
+            `timestamp` TIME NOT NULL,
+            PRIMARY KEY `id` (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        ";
+        */
+
         return Db::getInstance()->execute($query);
     }
 

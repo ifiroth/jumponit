@@ -1,28 +1,42 @@
 {% extends "@Modules/jumponit/template/admin/index.html.twig" %}
 
 {% block main %}
+{{ dump(sellers) }}
     <table class="table">
         <thead>
             <tr>
                 <th scope="col">#</th>
                 <th scope="col">Nom</th>
                 <th scope="col">Ville</th>
+                <th scope="col">Produits</th>
+                <th scope="col">Dont non répertoriés</th>
                 <th scope="col">Dernière action</th>
             </tr>
         </thead>
         <tbody>
-            {% for seller in notLocatedSellers %}
+            {% for seller in sellers %}
             <tr>
                 <th scope="col">#</th>
                 <td>{{ seller.name }}</td>
-                <td class="d-inline-flex">
+                <td class="d-inline-flex w-100">
                     <select class="custom-select">
-                        <option value="0" selected disabled>Sélectionner</option>
+                        {% if not seller.city %}<option value="0" selected disabled>Sélectionner</option>{% endif %}
                         {% for city in cities %}
-                        <option value="{{ city.id_feature_value }}">{{ city.name }}</option>
+                        <option value="{{ city.id_feature_value }}" {% if seller.city == city.name %} selected {% endif %}>{{ city.name }}</option>
                         {% endfor %}
                     </select>
-                    <input type="submit" value="Attribuer">
+                    <input type="submit" value="Attribuer" class="btn btn-outline-primary mx-1">
+                </td>
+                <td>{{ seller.product_count }}</td>
+                <td>
+                    {{ seller.product_not_located_count }}
+                    <a
+                        href="{{ path('joi_admin_product_refresh', seller.id)}}"
+                        type="submit" value="Localiser"
+                        class="btn btn-outline-primary mx-1{% if not seller.product_not_located_count %} disabled {% endif %}"
+                    >
+                        Auto-Localiser
+                    </a>
                 </td>
                 <td>Dernière action</td>
             </tr>

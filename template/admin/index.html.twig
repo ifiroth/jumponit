@@ -9,11 +9,10 @@
             <h2 class="card-header">Administration du module Jump on It</h2>
         {% endif %}
         {% block main %}
-            {% if not last_imported_feature_value %}
+            {% if not joi_products.last_feature_value_import %}
                 <div class="alert alert-warning">
                     Vous n'avez pas encore contrôler la localisation des produits. Veuillez
                     <a href="{{ path('joi_admin_product_refresh') }}">localiser les produits non répertoriés</a>.
-                    {{ dump(last_imported_feature_value) }}
                 </div>
             {% endif %}
             <div class="d-flex">
@@ -23,20 +22,24 @@
                         <a href="{{ path('joi_admin_product_detail') }}">
                             Produits non localisés
                         </a>
-                        <span class="badge badge-danger badge-pill">{{ notLocatedProducts|length }}</span>
+                        <span class="badge badge-danger badge-pill">{{ joi_products.notLocatedProducts|length }}</span>
                     </li>
                     <li class="list-group-item list-group-item-action text-warning" >
                         <a href="{{ path('joi_admin_seller_detail') }}">
                             Vendeur non localisé
                         </a>
-                        <span class="badge badge-warning badge-pill">{{ notLocatedSellers|length }}</span>
+                        <span class="badge badge-warning badge-pill">{{ joi_sellers.notLocatedSellers|length }}</span>
                     </li>
                     <li class="list-group-item list-group-item-action " >{{ locations|length }} Villes répertoriées</li>
                     <li class="list-group-item lead font-weight-bold">Actions rapides</li>
-                    <li class="list-group-item list-group-item-action">
+                    <li class="list-group-item list-group-item-action d-flex justify-content-between">
                         <a href="{{ path('joi_admin_product_refresh') }}">Localiser les produits non répertoriés</a>
+                        <small>{{ joi_products.last_feature_value_import|date('j M') }}</small>
                     </li>
-                    <li class="list-group-item list-group-item-action disabled" >Envoyer un rappel aux vendeurs - Dernier rappel le 01/01/01</li>
+                    <li class="list-group-item list-group-item-action d-flex justify-content-between">
+                        <a href="{{ path('joi_admin_seller_general_warning') }}">Envoyer un rappel général aux vendeurs</a>
+                        <small>{{ joi_sellers.last_seller_general_warning|date('j M') }}</small>
+                    </li>
                     <li class="list-group-item list-group-item-action disabled" >
                         <form class="d-inline">
                             <label for>Changer le nom de la caractéristique en </label>

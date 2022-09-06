@@ -10,6 +10,14 @@ joi_admin_product_refresh:
   defaults:
     _controller: 'JOI\Controller\Admin\Product\IndexController::refreshAction'
 
+joi_admin_product_refresh_single:
+  path: joi/admin/product/refresh/{seller}
+  methods: [ GET ]
+  defaults:
+    _controller: 'JOI\Controller\Admin\Product\IndexController::refreshSingleAction'
+  requirements:
+    seller: '\d+'
+
 joi_admin_product_detail:
   path: joi/admin/product/detail
   methods: [ GET ]
@@ -27,3 +35,9 @@ joi_admin_seller_detail:
   methods: [ GET ]
   defaults:
     _controller: 'JOI\Controller\Admin\Seller\IndexController::detailAction'
+
+joi_admin_seller_general_warning:
+  path: joi/admin/seller/generalWarning
+  methods: [ GET ]
+  defaults:
+    _controller: 'JOI\Controller\Admin\Seller\IndexController::generalWarningAction'
