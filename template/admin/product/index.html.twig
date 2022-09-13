@@ -12,7 +12,7 @@
         </tr>
         </thead>
         <tbody>
-        {% for product in notLocatedProducts %}
+        {% for product in products %}
             <tr>
                 <th scope="col">#</th>
                 <td>{{ product.product_name }}</td>
@@ -21,7 +21,9 @@
                     <select class="custom-select">
                         <option value="0" selected disabled>Sélectionner</option>
                         {% for city in cities %}
-                            <option value="{{ city.id_feature_value }}">{{ city.name }}</option>
+                            {% if city.id_feature_value %}
+                                <option value="{{ city.id_feature_value }}">{{ city.nom_comm }}</option>
+                            {% endif %}
                         {% endfor %}
                     </select>
                     <input type="submit" value="Attribuer">

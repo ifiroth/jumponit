@@ -53,3 +53,11 @@ joi_admin_city_import:
     methods: [ GET ]
     defaults:
         _controller: 'JOI\Controller\Admin\City\IndexController::importAction'
+
+joi_admin_city_activity:
+    path: joi/admin/city/activity/toggle/{id_city}/{state}
+    methods: [ GET ]
+    defaults:
+        _controller: 'JOI\Controller\Admin\City\IndexController::toggleActivityAction'
+    requirements:
+        id_city: '\d+'

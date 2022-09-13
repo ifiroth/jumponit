@@ -68,8 +68,25 @@ class ProductManager {
                 }
             }
         }
-
-
         return $i;
+    }
+
+    static public function getProducts(): ?array {
+
+        $lang_id = (int) \Configuration::get('PS_LANG_DEFAULT');
+
+        $sql = new \DbQuery();
+
+        $sql->select('p.`id_product`, s.`name` as seller_name, s.`city`, fp.`id_feature_value`, pl.`name` as product_name');
+        $sql->from('product', 'p');
+        $sql->innerJoin('seller_product', 'sp', 'p.`id_product` = sp.`id_product`');
+        $sql->innerJoin('seller', 's', 'sp.`id_seller` = s.`id_seller`');
+        $sql->innerJoin('product_lang', 'pl', 'pl.`id_product` = p.`id_product` AND pl.`id_lang` = '. $lang_id);
+        $sql->leftJoin('feature_product', 'fp', 'fp.`id_product` = p.`id_product`');
+        $sql->orderBy('p.`id_product`');
+
+        $products = \Db::getInstance()->executeS($sql);
+
+        return $products ?: null;
     }
 }

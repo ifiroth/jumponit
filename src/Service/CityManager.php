@@ -16,32 +16,123 @@ class CityManager {
 
     public function getCities() : ?array {
 
+
         $sql = new \DbQuery();
 
-        $sql->select('c.`id_feature_value`, c.`postal_code`, c.`nom_comm`');
+        $sql->select('
+            c.`id_feature_value`,
+            c.`postal_code`,
+            c.`nom_comm`,
+            c.`id_city`,
+            fp.`id_product` AS product_count,
+            sp.`id_seller` AS seller_count
+        ');
         $sql->from('joi_city', 'c');
+        $sql->leftJoin('feature_product', 'fp', 'fp.`id_feature_value` = c.`id_feature_value`');
+        $sql->leftJoin('seller_product', 'sp', 'sp.`id_product` = fp.`id_product`');
+        $sql->orderBy('c.`id_feature_value` DESC, c.`nom_comm` ASC');
+        $sql->groupBy('c.`nom_comm`');
+        // TODO : pagination instead of limit 50
+        $sql->limit(50);
+
+        // TODO : Optimize query with COUNT(fp.`id_product`) AS product_count, + id_seller
 
         $cities = \Db::getInstance()->executeS($sql);
 
         return $cities ?: null;
     }
 
-    public function importCities() : bool {
+    public function importCities() : int {
 
         $mod_prefix = \Configuration::get('module_prefix');
         \Configuration::updateValue($mod_prefix .'last_city_import', time());
 
+        $i = 0;
+
         $cityFile = file_get_contents(__DIR__ .'/../../utils/inseeCities.json');
-        $cities = json_decode($cityFile);
+        $cities = json_decode($cityFile, true);
+
+        $sqlManager = new SqlManager();
+        $sqlManager->reset('city');
 
         foreach ($cities as $city) {
             $db = \Db::getInstance();
+            $fields = $city['fields'];
+
             $result = $db->insert('joi_city', [
-                'postal_code' => (int) $city['postal_code'],
-                'nom_comm' => $city['nom_comm'],
+                'postal_code' => (int) $fields['postal_code'],
+                'nom_comm' => htmlentities($fields['nom_comm'], ENT_QUOTES),
             ]);
+
+            $i++;
         }
 
-        return 'importation';
+        return $i;
+    }
+
+    public function getCityName($id_city) : ?string {
+        $sql = new \DbQuery();
+
+        $sql->select('c.`nom_comm`');
+        $sql->from('joi_city', 'c');
+        $sql->where('c.`id_city` = '. $id_city);
+
+        $result = \Db::getInstance()->getRow($sql);
+
+        return $result['nom_comm'];
+    }
+
+    public function getCityByName($name) : ?int {
+        $sql = new \DbQuery();
+
+        $sql->select('c.`id_city`');
+        $sql->from('joi_city', 'c');
+        $sql->where('c.`nom_comm` = "'. htmlentities(strtoupper($name)) .'"');
+
+        dump($name);
+
+        $result = \Db::getInstance()->getRow($sql);
+
+        return $result ? $result['id_city'] : null;
+    }
+
+    public function toggleActivity($id_city, $state, $name) : ?bool {
+
+        if ($state) {
+
+            $id_feature_value = FeatureManager::hasValueId($id_city);
+
+            if (!$id_feature_value) {
+
+                $id_feature_value = FeatureManager::createValue($name);
+            }
+
+        } else {
+            $id_feature_value = null;
+        }
+
+        $db = \Db::getInstance();
+
+        $result = $db->update('joi_city', [
+            'id_feature_value' => $id_feature_value
+        ], 'id_city = '. $id_city, 1);
+
+        return $result;
+
+    }
+
+    public function linkFeatureToCity($id_city, $id_feature_value) {
+
+        $db = \Db::getInstance();
+
+        dump($id_city);
+
+        $result = $db->update('joi_city', [
+            'id_feature_value' => $id_feature_value
+        ], 'id_city = '. $id_city, 1);
+
+        dump($result);
+
+        return $result;
     }
 }

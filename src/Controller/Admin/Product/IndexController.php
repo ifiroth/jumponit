@@ -47,8 +47,11 @@ class IndexController extends FrameworkBundleAdminController
     {
         $cityManager = new CityManager();
 
+        $products = ProductManager::getProducts();
+        dump($products);
+
         return $this->render('@Modules/jumponit/template/admin/product/index.html.twig', [
-            'notLocatedProducts' => ProductManager::getNotLocatedProducts(),
+            'products' => ProductManager::getProducts(),
             'action' => 'product',
             'cities' => $cityManager->getCities(),
         ]);

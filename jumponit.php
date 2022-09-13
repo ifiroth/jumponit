@@ -92,7 +92,7 @@ class JumpOnIt extends Module
                 && $this->tabManager->install()
                 && $this->sqlManager->install()
                 && $this->featureManager->initFeature()
-                //&& $this->cityManager->importCities()
+                && $this->cityManager->importCities()
                 //&& $this->registerHook('filterCategoryContent')
                 //&& $this->registerHook('filterProductSearch')
                 //&& $this->registerHook('productSearchProvider')

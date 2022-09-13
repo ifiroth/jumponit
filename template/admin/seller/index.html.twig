@@ -21,7 +21,9 @@
                     <select class="custom-select">
                         {% if not seller.city %}<option value="0" selected disabled>Sélectionner</option>{% endif %}
                         {% for city in cities %}
-                        <option value="{{ city.id_feature_value }}" {% if seller.city == city.name %} selected {% endif %}>{{ city.name }}</option>
+                            {% if city.id_feature_value %}
+                            <option value="{{ city.id_feature_value }}" {% if seller.city == city.nom_comm %} selected {% endif %}>{{ city.nom_comm }}</option>
+                            {% endif %}
                         {% endfor %}
                     </select>
                     <input type="submit" value="Attribuer" class="btn btn-outline-primary mx-1">

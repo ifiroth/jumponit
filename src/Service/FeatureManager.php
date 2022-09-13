@@ -63,11 +63,24 @@ class FeatureManager {
         self::__initStatic();
 
         $featurevalue = new \FeatureValue;
-        $featurevalue->id_feature = self::$id;;
-        $featurevalue->value = [ self::$lang_id => $name ];
-        $featurevalue->add();
+        $cityManager = new CityManager();
 
-        return $featurevalue->id;
+        $id_city = $cityManager->getCityByName($name);
+
+        if ($id_city) {
+
+            $featurevalue->id_feature = self::$id;;
+            $featurevalue->value = [ self::$lang_id => $name ];
+            $featurevalue->add();
+
+            $cityManager->linkFeatureToCity($id_city, $featurevalue->id);
+
+            return $featurevalue->id;
+
+        } else {
+
+            return null;
+        }
     }
 
     static public function countValue($id = null) : ?array
