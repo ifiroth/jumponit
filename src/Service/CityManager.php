@@ -31,7 +31,7 @@ class CityManager {
         $sql->leftJoin('feature_product', 'fp', 'fp.`id_feature_value` = c.`id_feature_value`');
         $sql->leftJoin('seller_product', 'sp', 'sp.`id_product` = fp.`id_product`');
         $sql->orderBy('c.`id_feature_value` DESC, c.`nom_comm` ASC');
-        $sql->groupBy('c.`nom_comm');
+        $sql->groupBy('c.`nom_comm`');
         // TODO : pagination instead of limit 50
         $sql->limit(50);
 
