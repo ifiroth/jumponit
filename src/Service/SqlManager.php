@@ -6,6 +6,8 @@ use Db;
 
 class SqlManager {
 
+    private array $sql = [];
+
     public function __construct() {
 
         $this->sql['city'] = "
@@ -20,14 +22,11 @@ class SqlManager {
                 `statut` VARCHAR(255) NOT NULL,
                 `code_reg` INT NOT NULL,
                 `code_dept` INT NOT NULL,
-                `longitude` FLOAT(2, 16) NOT NULL,
-                `latitude` FLOAT(2, 16) NOT NULL,
-                `geo_shape` JSON NOT NULL,
+                `geo_center` TEXT NOT NULL,
+                `geo_shape` TEXT NOT NULL,
                 PRIMARY KEY (`id_city`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
             ";
-
-        // TODO : Uncomment $this->sql['city'] declaration
 
         $this->sql['log_action'] = "
             DROP TABLE IF EXISTS `". _DB_PREFIX_ ."joi_log_action`;
@@ -43,7 +42,8 @@ class SqlManager {
             ";
     }
 
-    public function install() {
+    public function install(): bool
+    {
 
         $i = 0;
 
@@ -53,15 +53,15 @@ class SqlManager {
 
             if ($result)
             {
-
                 $i++;
             }
         }
 
-        return $i;
+        return (bool) $i;
     }
 
-    public function uninstall() {
+    public function uninstall(): bool
+    {
 
         $query = '';
 
@@ -74,7 +74,7 @@ class SqlManager {
     }
 
     public function reset($table) : bool {
-        if (in_array($table, $this->sql)) {
+        if (array_key_exists($table, $this->sql)) {
 
             return Db::getInstance()->execute($this->sql[$table]);
         }

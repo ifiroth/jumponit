@@ -16,7 +16,6 @@ class CityManager {
 
     public function getCities() : ?array {
 
-
         $sql = new \DbQuery();
 
         $sql->select('
@@ -32,7 +31,9 @@ class CityManager {
         $sql->leftJoin('seller_product', 'sp', 'sp.`id_product` = fp.`id_product`');
         $sql->orderBy('c.`id_feature_value` DESC, c.`nom_comm` ASC');
         $sql->groupBy('c.`nom_comm`');
+
         // TODO : pagination instead of limit 50
+
         $sql->limit(50);
 
         // TODO : Optimize query with COUNT(fp.`id_product`) AS product_count, + id_seller
@@ -55,6 +56,8 @@ class CityManager {
         $sqlManager = new SqlManager();
         $sqlManager->reset('city');
 
+        dump($cities);
+
         foreach ($cities as $city) {
             $db = \Db::getInstance();
             $fields = $city['fields'];
@@ -65,11 +68,10 @@ class CityManager {
                 'code_reg' => (int) $fields['code_reg'],
                 'nom_comm' => htmlentities($fields['nom_comm'], ENT_QUOTES),
                 'nom_dept' => htmlentities($fields['nom_dept'], ENT_QUOTES),
-                'nom_reg' => htmlentities($fields['nom_reg'], ENT_QUOTES),
-                'latitude' => (int) $fields['geo_point_2d'][0],
-                'longitude' => (int) $fields['geo_point_2d'][1],
+                'nom_reg' => htmlentities($fields['nom_region'], ENT_QUOTES),
+                'geo_center' => json_encode($fields['geo_point_2d']),
                 'geo_shape' => json_encode($fields['geo_shape']['coordinates']),
-                'statut' => $fields['statut']
+                'statut' => htmlentities($fields['statut'], ENT_QUOTES),
             ]);
 
             $i++;
