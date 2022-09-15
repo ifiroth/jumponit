@@ -31,7 +31,7 @@ class CityManager {
         $sql->leftJoin('feature_product', 'fp', 'fp.`id_feature_value` = c.`id_feature_value`');
         $sql->leftJoin('seller_product', 'sp', 'sp.`id_product` = fp.`id_product`');
         $sql->orderBy('c.`id_feature_value` DESC, c.`nom_comm` ASC');
-        $sql->groupBy('c.`nom_comm`');
+        $sql->groupBy('c.`nom_comm');
         // TODO : pagination instead of limit 50
         $sql->limit(50);
 
@@ -59,9 +59,17 @@ class CityManager {
             $db = \Db::getInstance();
             $fields = $city['fields'];
 
-            $result = $db->insert('joi_city', [
+            $db->insert('joi_city', [
                 'postal_code' => (int) $fields['postal_code'],
+                'code_dept' => (int) $fields['code_dept'],
+                'code_reg' => (int) $fields['code_reg'],
                 'nom_comm' => htmlentities($fields['nom_comm'], ENT_QUOTES),
+                'nom_dept' => htmlentities($fields['nom_dept'], ENT_QUOTES),
+                'nom_reg' => htmlentities($fields['nom_reg'], ENT_QUOTES),
+                'latitude' => (int) $fields['geo_point_2d'][0],
+                'longitude' => (int) $fields['geo_point_2d'][1],
+                'geo_shape' => json_encode($fields['geo_shape']['coordinates']),
+                'statut' => $fields['statut']
             ]);
 
             $i++;
@@ -76,6 +84,32 @@ class CityManager {
         $sql->select('c.`nom_comm`');
         $sql->from('joi_city', 'c');
         $sql->where('c.`id_city` = '. $id_city);
+
+        $result = \Db::getInstance()->getRow($sql);
+
+        return $result['nom_comm'];
+    }
+
+    public function getCityByArea($step, $areaCode) {
+
+        $sql = new \DbQuery();
+
+        $sql->select('c.`nom_comm`');
+        $sql->from('joi_city', 'c');
+
+        switch ($step) {
+            case 'dept':
+                $sql->where('c.`code_dept` = '. $areaCode);
+                break;
+
+            case 'reg':
+                $sql->where('c.`code_reg` = '. $areaCode);
+                break;
+
+            default:
+                $sql->where();
+                break;
+        }
 
         $result = \Db::getInstance()->getRow($sql);
 

@@ -93,6 +93,7 @@ class JumpOnIt extends Module
                 && $this->sqlManager->install()
                 && $this->featureManager->initFeature()
                 && $this->cityManager->importCities()
+                && $this->registerHook('displayHeader')
                 //&& $this->registerHook('filterCategoryContent')
                 //&& $this->registerHook('filterProductSearch')
                 //&& $this->registerHook('productSearchProvider')
@@ -108,9 +109,10 @@ class JumpOnIt extends Module
     {
         return parent::uninstall()
 
-            && $this->tabManager->uninstall()
             && $this->sqlManager->uninstall()
+            && $this->tabManager->uninstall()
             && $this->featureManager->deleteFeature()
+            && $this->unregisterHook('displayHeader')
             //&& $this->unregisterHook('filterCategoryContent')
             //&& $this->unregisterHook('filterProductSearch')
             //&& $this->unregisterHook('productSearchProvider')
@@ -123,6 +125,12 @@ class JumpOnIt extends Module
         $output = 'Id de l\'attribut : '. Configuration::get(_MOD_PREFIX_.'feature_id') .'<br>';
 
         return $output;
+    }
+
+
+    public function hookDisplayHeader() {
+
+        $this->context->controller->addJS($this->_path .'assets/js/geolocation.js');
     }
 
     /*

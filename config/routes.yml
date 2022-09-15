@@ -61,3 +61,9 @@ joi_admin_city_activity:
         _controller: 'JOI\Controller\Admin\City\IndexController::toggleActivityAction'
     requirements:
         id_city: '\d+'
+
+joi_city_list:
+    path: joi/city/list/{step}/{area}
+    methods: [ GET ]
+    defaults:
+        _controller: 'JOI\Controller\Front\City\IndexController::listAction'
