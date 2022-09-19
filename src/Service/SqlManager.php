@@ -28,6 +28,15 @@ class SqlManager {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
             ";
 
+        $this->sql['product_city'] = "
+            DROP TABLE IF EXISTS `". _DB_PREFIX_ ."joi_product_city`;
+            CREATE TABLE IF NOT EXISTS `". _DB_PREFIX_ ."joi_product_city` (
+                `id_city` INT,
+                `id_product` INT,
+                PRIMARY KEY (`id_city`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        ";
+
         $this->sql['log_action'] = "
             DROP TABLE IF EXISTS `". _DB_PREFIX_ ."joi_log_action`;
             CREATE TABLE IF NOT EXISTS `". _DB_PREFIX_ ."joi_log_action` (

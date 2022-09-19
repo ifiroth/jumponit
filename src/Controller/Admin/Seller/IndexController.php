@@ -25,10 +25,11 @@ class IndexController extends FrameworkBundleAdminController
     public function detailAction() : Response
     {
         $cityManager = new CityManager();
+        $sellerManager = new SellerManager();
 
         return $this->render('@Modules/jumponit/template/admin/seller/index.html.twig', [
-            'notLocatedSellers' => SellerManager::getNotLocatedSellers(),
-            'sellers' => SellerManager::getSellers(),
+            'notLocatedSellers' => $sellerManager->getNotLocatedSellers(),
+            'sellers' => $sellerManager->getSellers(),
             'cities' => $cityManager->getCities(),
             'action' => 'seller',
         ]);

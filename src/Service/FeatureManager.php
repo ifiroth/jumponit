@@ -2,40 +2,33 @@
 
 namespace JOI\Service;
 
-use JOI\Service\Debug;
-
 class FeatureManager {
-    static private $id;
-    static private $lang_id;
-    static private $mod_prefix;
 
-    public static function __initStatic () {
+    public function __construct () {
 
-        self::$mod_prefix = \Configuration::get('module_prefix');
-        self::$id = \Configuration::get(self::$mod_prefix. 'feature_id');
-        self::$lang_id = (int) \Configuration::get('PS_LANG_DEFAULT');
+        $this->mod_prefix = \Configuration::get('module_prefix');
+        $this->id = \Configuration::get($this->mod_prefix. 'feature_id');
+        $this->lang_id = (int) \Configuration::get('PS_LANG_DEFAULT');
     }
 
     public function initFeature() : bool
     {
-        self::__initStatic();
 
         $feature = new \Feature();
-        $feature->name = [ self::$lang_id => \Configuration::get(self::$mod_prefix .'feature_label') ];
+        $feature->name = [ $this->lang_id => \Configuration::get($this->mod_prefix .'feature_label') ];
         $feature->position = \Feature::getHigherPosition() + 1;
         $result = $feature->add();
 
-        \Configuration::updateValue(self::$mod_prefix .'feature_id', $feature->id);
+        \Configuration::updateValue($this->mod_prefix .'feature_id', $feature->id);
 
         return $result;
     }
 
     public function deleteFeature() : bool
     {
-        self::__initStatic();
 
-        if (self::$id) {
-            $feature = new \Feature(self::$id);
+        if ($this->id) {
+            $feature = new \Feature($this->id);
             return $feature->delete();
 
         } else {
@@ -44,38 +37,26 @@ class FeatureManager {
         }
     }
 
-    static public function hasValueId(string $name) : ?int
+    public function resetFeatureValue() : ?int
     {
-        self::__initStatic();
+        if ($this->id) {
 
-        $values = \FeatureValue::getFeatureValues(self::$id);
-        foreach ($values as $value) {
-            $featureValue = new \FeatureValue($value['id_feature_value'], self::$lang_id);
-            if ($name == $featureValue->value) {
-                return $value['id_feature_value'];
+            $this->deleteFeature();
+            $this->initFeature();
+
+            $cityManger = new CityManager();
+            $cities = $cityManger->getCities([], [], 0, 0);
+
+            dump($cities);
+            $i = 0;
+
+            foreach ($cities as $city) {
+
+                $this->createValue($city['nom_comm'], $city['id_city']);
+                $i++;
             }
-        }
-        return false;
-    }
 
-    static public function createValue(string $name) : ?int
-    {
-        self::__initStatic();
-
-        $featurevalue = new \FeatureValue;
-        $cityManager = new CityManager();
-
-        $id_city = $cityManager->getCityByName($name);
-
-        if ($id_city) {
-
-            $featurevalue->id_feature = self::$id;;
-            $featurevalue->value = [ self::$lang_id => $name ];
-            $featurevalue->add();
-
-            $cityManager->linkFeatureToCity($id_city, $featurevalue->id);
-
-            return $featurevalue->id;
+            return $i;
 
         } else {
 
@@ -83,23 +64,44 @@ class FeatureManager {
         }
     }
 
-    static public function countValue($id = null) : ?array
+    public function getFeatureValueIdByName(string $name) : ?int
     {
-        self::__initStatic();
+        $values = \FeatureValue::getFeatureValues($this->id);
+        foreach ($values as $value) {
+            $featureValue = new \FeatureValue($value['id_feature_value'], $this->lang_id);
+            if ($name == $featureValue->value) {
+                return $value['id_feature_value'];
+            }
+        }
+        return false;
+    }
 
+    public function createValue(string $name, int $id_city) : ?int
+    {
+        $featurevalue = new \FeatureValue;
+        $featurevalue->id_feature = $this->id;;
+        $featurevalue->value = [ $this->lang_id => $name ];
+        $featurevalue->add();
+
+        $cityManager = new CityManager();
+        $cityManager->linkFeatureToCity($id_city, $featurevalue->id);
+
+        return $featurevalue->id;
+    }
+
+    public function countValue($id = null) : ?array
+    {
         if (!$id)
-            $id = self::$id;
+            $id = $this->id;
 
         return \FeatureValue::getFeatureValues($id);
     }
 
-    static public function getFeature($id = null) : array
+    public function getFeature($id = null) : array
     {
-        self::__initStatic();
-
         if (!$id)
-            $id = self::$id;
+            $id = $this->id;
 
-        return \Feature::getFeature(self::$lang_id, $id) ?: [ self::$id ];
+        return \Feature::getFeature($this->lang_id, $id) ?: [ $this->id ];
     }
 }

@@ -7,7 +7,7 @@ use JOI\Service\Debug;
 
 class ProductManager {
 
-    static public function getNotLocatedProducts($id_seller = null): ?array {
+    public function getNotLocatedProducts($id_seller = null): ?array {
 
         $lang_id = (int) \Configuration::get('PS_LANG_DEFAULT');
 
@@ -19,7 +19,7 @@ class ProductManager {
 
         $sql = new \DbQuery();
 
-        $sql->select('p.`id_product`, s.`name` as seller_name, s.`city`, fp.`id_feature_value`, pl.`name` as product_name');
+        $sql->select('p.`id_product`, s.`name` as seller_name, s.`postcode` AS seller_postal_code, fp.`id_feature_value`, pl.`name` as product_name');
         $sql->from('product', 'p');
         $sql->innerJoin('seller_product', 'sp', 'p.`id_product` = sp.`id_product`');
         $sql->innerJoin('seller', 's', 'sp.`id_seller` = s.`id_seller`');
@@ -33,7 +33,11 @@ class ProductManager {
         return $products ?: null;
     }
 
-    static public function setLocationToProducts($id_seller = null) : int {
+    public function setLocationToProducts($id_seller = null) : int {
+
+        $featureManager = new FeatureManager();
+        $productManager = new ProductManager();
+        $cityManager = new CityManager();
 
         $i = 0;
 
@@ -46,23 +50,15 @@ class ProductManager {
         if ($products) {
             foreach ($products as $product) {
 
-                $hasValueId = FeatureManager::hasValueId($product['city']);
+                // Si le vendeur du produit a renseigner un code postal
+                if ($product['seller_postal_code'] != '') {
 
-                if ($product['city'] != '') {
-
-                    // Si la feature n'existe pas, on la crée
-                    if (!$hasValueId) {
-
-                        $id_feature_value = FeatureManager::createValue($product['city']);
-
-                        // Sinon, on récupère juste son id
-                    } else {
-
-                        $id_feature_value = $hasValueId;
-                    }
+                    $feature_value = $cityManager->getFeatureValuePostalCode($product['seller_postal_code']);
+                    $id_feature_value = $feature_value->id;
+                    $id_feature = $feature_value->id_feature;
 
                     // Une fois qu'on a toutes les infos, on peut lier le produit à son attribut.
-                    Product::addFeatureProductImport($product['id_product'], (int) $id_feature, (int) $id_feature_value);
+                    $productManager->addFeatureProductImport($product['id_product'], (int) $id_feature, (int) $id_feature_value);
                     $i++;
 
                 }
@@ -71,7 +67,11 @@ class ProductManager {
         return $i;
     }
 
-    static public function getProducts(): ?array {
+    public function addFeatureProductImport($id_product, $id_feature, $id_feature_value) {
+
+    }
+
+    public function getProducts(): ?array {
 
         $lang_id = (int) \Configuration::get('PS_LANG_DEFAULT');
 
@@ -89,4 +89,6 @@ class ProductManager {
 
         return $products ?: null;
     }
+
+
 }

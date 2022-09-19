@@ -14,7 +14,9 @@ class CityManager {
         return null;
     }
 
-    public function getCities() : ?array {
+    public function getCities(array $orderClauses = [], array $whereClauses = [], int $page = 0, int $limit = 50) : ?array {
+
+        $sortableFields = $searchableFields = ['postal_code', 'nom_comm', 'nom_dept', 'nom_reg'];
 
         $sql = new \DbQuery();
 
@@ -22,6 +24,8 @@ class CityManager {
             c.`id_feature_value`,
             c.`postal_code`,
             c.`nom_comm`,
+            c.`nom_dept`,
+            c.`nom_reg`,
             c.`id_city`,
             fp.`id_product` AS product_count,
             sp.`id_seller` AS seller_count
@@ -29,12 +33,45 @@ class CityManager {
         $sql->from('joi_city', 'c');
         $sql->leftJoin('feature_product', 'fp', 'fp.`id_feature_value` = c.`id_feature_value`');
         $sql->leftJoin('seller_product', 'sp', 'sp.`id_product` = fp.`id_product`');
-        $sql->orderBy('c.`id_feature_value` DESC, c.`nom_comm` ASC');
         $sql->groupBy('c.`nom_comm`');
 
-        // TODO : pagination instead of limit 50
+        function formatOrder(string $f, string $d) : string {
+            return 'c.`'. $f .'` '. $d;
+        }
 
-        $sql->limit(50);
+        function formatWhere(string $k, string $v) : string {
+            return 'c.`'. $k .'` LIKE "%'. $v .'%"';
+        }
+
+        if (is_array($orderClauses)) {
+
+            $order = [];
+
+            foreach ($orderClauses as $field => $direction) {
+
+                if (in_array($field, $sortableFields)) $order[] = formatOrder($field, $direction);
+            }
+
+            $sql->orderBy(implode(',', $order));
+
+        } else {
+
+            $sql->orderBy('c.`id_feature_value` DESC, c.`nom_comm` ASC');
+        }
+
+        if (is_array($whereClauses)) {
+
+            $where = [];
+
+            foreach ($whereClauses as $key => $value) {
+
+                if (in_array($key, $searchableFields)) $where[] = formatWhere($key, $value);
+            }
+
+            $sql->where(implode(' AND ', $where));
+        }
+
+        $sql->limit($limit, ($page * $limit));
 
         // TODO : Optimize query with COUNT(fp.`id_product`) AS product_count, + id_seller
 
@@ -43,12 +80,21 @@ class CityManager {
         return $cities ?: null;
     }
 
+    public function getCitiesCount() : int {
+        $sql = new \DbQuery();
+
+        $sql->select('
+            c.`id_city`
+        ');
+        $sql->from('joi_city', 'c');
+
+        return \Db::getInstance()->numRows($sql);
+    }
+
     public function importCities() : int {
 
         $mod_prefix = \Configuration::get('module_prefix');
         \Configuration::updateValue($mod_prefix .'last_city_import', time());
-
-        $i = 0;
 
         $cityFile = file_get_contents(__DIR__ .'/../../utils/inseeCities.json');
         $cities = json_decode($cityFile, true);
@@ -56,7 +102,7 @@ class CityManager {
         $sqlManager = new SqlManager();
         $sqlManager->reset('city');
 
-        dump($cities);
+        $i = 0;
 
         foreach ($cities as $city) {
             $db = \Db::getInstance();
@@ -92,7 +138,40 @@ class CityManager {
         return $result['nom_comm'];
     }
 
-    public function getCityByArea($step, $areaCode) {
+    public function getFeatureValuePostalCode($postal_code) : ?\FeatureValue {
+
+        $featureManager = new FeatureManager();
+
+        $city_name = $this->getCityNameByPostalCode($postal_code);
+
+        $id_feature_value = $featureManager->getFeatureValueIdByName($city_name);
+
+        try {
+            return new \FeatureValue($id_feature_value);
+
+        } catch (\PrestaShopDatabaseException $e) {
+
+            return null;
+
+        } catch (\PrestaShopException $e) {
+
+            return null;
+        }
+    }
+
+    public function getCityNameByPostalCode(int $postal_code) : string {
+        $sql = new \DbQuery();
+
+        $sql->select('c.`nom_comm`');
+        $sql->from('joi_city', 'c');
+        $sql->where('c.`postal_code` = '. (int) $postal_code);
+
+        $result = \Db::getInstance()->getRow($sql);
+
+        return $result['nom_comm'];
+    }
+
+    public function getCityByArea(string $step, int $areaCode) {
 
         $sql = new \DbQuery();
 
@@ -118,29 +197,30 @@ class CityManager {
         return $result['nom_comm'];
     }
 
-    public function getCityByName($name) : ?int {
+    public function getCityIdByName($name) : ?int {
         $sql = new \DbQuery();
 
         $sql->select('c.`id_city`');
         $sql->from('joi_city', 'c');
         $sql->where('c.`nom_comm` = "'. htmlentities(strtoupper($name)) .'"');
 
-        dump($name);
-
         $result = \Db::getInstance()->getRow($sql);
 
         return $result ? $result['id_city'] : null;
     }
 
+    /* AVORTED
     public function toggleActivity($id_city, $state, $name) : ?bool {
+
+        $featureManager = new FeatureManager();
 
         if ($state) {
 
-            $id_feature_value = FeatureManager::hasValueId($id_city);
+            $id_feature_value = $featureManager->hasValueId($id_city);
 
             if (!$id_feature_value) {
 
-                $id_feature_value = FeatureManager::createValue($name);
+                $id_feature_value = $featureManager->createValue($name, $id_city);
             }
 
         } else {
@@ -156,18 +236,15 @@ class CityManager {
         return $result;
 
     }
+    */
 
     public function linkFeatureToCity($id_city, $id_feature_value) {
 
         $db = \Db::getInstance();
 
-        dump($id_city);
-
         $result = $db->update('joi_city', [
             'id_feature_value' => $id_feature_value
         ], 'id_city = '. $id_city, 1);
-
-        dump($result);
 
         return $result;
     }

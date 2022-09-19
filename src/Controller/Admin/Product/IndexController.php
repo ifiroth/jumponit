@@ -9,11 +9,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class IndexController extends FrameworkBundleAdminController
 {
-
     public function refreshAction($id_seller = null) : Response
     {
+        $productManager = new ProductManager();
+
         // $em = $this->getDoctrine()->getManager();
-        $productLocationsSet = ProductManager::setLocationToProducts($id_seller);
+        $productLocationsSet = $productManager->setLocationToProducts($id_seller);
 
         switch ($productLocationsSet)
         {
@@ -46,12 +47,13 @@ class IndexController extends FrameworkBundleAdminController
     public function detailAction() : Response
     {
         $cityManager = new CityManager();
+        $productManager = new ProductManager();
 
-        $products = ProductManager::getProducts();
+        $products = $productManager->getProducts();
         dump($products);
 
         return $this->render('@Modules/jumponit/template/admin/product/index.html.twig', [
-            'products' => ProductManager::getProducts(),
+            'products' => $productManager->getProducts(),
             'action' => 'product',
             'cities' => $cityManager->getCities(),
         ]);

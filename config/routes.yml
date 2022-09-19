@@ -1,50 +1,50 @@
 joi_admin:
-  path: joi/admin
-  methods: [GET]
-  defaults:
-    _controller: 'JOI\Controller\Admin\IndexController::indexAction'
+    path: joi/admin
+    methods: [GET]
+    defaults:
+        _controller: 'JOI\Controller\Admin\IndexController::indexAction'
 
 joi_admin_product_refresh:
-  path: joi/admin/product/refresh
-  methods: [ GET ]
-  defaults:
-    _controller: 'JOI\Controller\Admin\Product\IndexController::refreshAction'
+    path: joi/admin/product/refresh
+    methods: [ GET ]
+    defaults:
+        _controller: 'JOI\Controller\Admin\Product\IndexController::refreshAction'
 
 joi_admin_product_refresh_single:
-  path: joi/admin/product/refresh/{id_seller}
-  methods: [ GET ]
-  defaults:
-    _controller: 'JOI\Controller\Admin\Product\IndexController::refreshAction'
-  requirements:
-    id_seller: '\d+'
+    path: joi/admin/product/refresh/{id_seller}
+    methods: [ GET ]
+    defaults:
+        _controller: 'JOI\Controller\Admin\Product\IndexController::refreshAction'
+    requirements:
+        id_seller: '\d+'
 
 joi_admin_product_detail:
-  path: joi/admin/product/detail
-  methods: [ GET ]
-  defaults:
-    _controller: 'JOI\Controller\Admin\Product\IndexController::detailAction'
+    path: joi/admin/product/detail
+    methods: [ GET ]
+    defaults:
+        _controller: 'JOI\Controller\Admin\Product\IndexController::detailAction'
 
 joi_admin_seller_refresh:
-  path: joi/admin/seller/refresh
-  methods: [ GET ]
-  defaults:
-    _controller: 'JOI\Controller\Admin\Seller\IndexController::refreshAction'
+    path: joi/admin/seller/refresh
+    methods: [ GET ]
+    defaults:
+        _controller: 'JOI\Controller\Admin\Seller\IndexController::refreshAction'
 
 joi_admin_seller_detail:
-  path: joi/admin/seller/detail
-  methods: [ GET ]
-  defaults:
-    _controller: 'JOI\Controller\Admin\Seller\IndexController::detailAction'
+    path: joi/admin/seller/detail
+    methods: [ GET ]
+    defaults:
+        _controller: 'JOI\Controller\Admin\Seller\IndexController::detailAction'
 
 joi_admin_seller_general_warning:
-  path: joi/admin/seller/generalWarning
-  methods: [ GET ]
-  defaults:
-    _controller: 'JOI\Controller\Admin\Seller\IndexController::generalWarningAction'
+    path: joi/admin/seller/generalWarning
+    methods: [ GET ]
+    defaults:
+        _controller: 'JOI\Controller\Admin\Seller\IndexController::generalWarningAction'
 
 joi_admin_city_detail:
     path: joi/admin/city/detail
-    methods: [ GET ]
+    methods: [ GET, POST ]
     defaults:
         _controller: 'JOI\Controller\Admin\City\IndexController::detailAction'
 
@@ -54,13 +54,21 @@ joi_admin_city_import:
     defaults:
         _controller: 'JOI\Controller\Admin\City\IndexController::importAction'
 
-joi_admin_city_activity:
-    path: joi/admin/city/activity/toggle/{id_city}/{state}
+#AVORTED
+#joi_admin_city_activity:
+#    path: joi/admin/city/activity/toggle/{id_city}/{state}
+#    methods: [ GET ]
+#    defaults:
+#       _controller: 'JOI\Controller\Admin\City\IndexController::toggleActivityAction'
+#    requirements:
+#        id_city: '\d+'
+
+joi_admin_city_reset_feature:
+    path: joi/admin/city/reset/feature
     methods: [ GET ]
     defaults:
-        _controller: 'JOI\Controller\Admin\City\IndexController::toggleActivityAction'
-    requirements:
-        id_city: '\d+'
+        _controller: 'JOI\Controller\Admin\City\IndexController::resetFeatureAction'
+
 
 joi_city_list:
     path: joi/city/list/{step}/{area}

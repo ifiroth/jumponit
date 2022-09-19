@@ -5,22 +5,53 @@
         <thead>
         <tr>
             <th scope="col">#</th>
-            <th scope="col">Nom</th>
-            <th scope="col">Code postal</th>
+            <th scope="col">
+                <a href="{{ path('joi_admin_city_detail') }}&sort=nom_comm">Nom</a>
+            </th>
+            <th scope="col"><a href="{{ path('joi_admin_city_detail') }}&sort=postal_code">Code postal</a></th>
+            <th scope="col"><a href="{{ path('joi_admin_city_detail') }}&sort=nom_reg">Région</a></th>
+            <th scope="col"><a href="{{ path('joi_admin_city_detail') }}&sort=nom_dept">Département</a></th>
             <th scope="col">Produits</th>
             <th scope="col">Vendeurs</th>
+            {#
             <th scope="col">Dernière action</th>
             <th scope="col">Actif</th>
+            #}
         </tr>
         </thead>
         <tbody>
+            <form action="{{ path('joi_admin_city_detail') }}" method="post">
+                <tr>
+                    <th></th>
+                    <th scope="col">
+                        <input type="text" name="nom_comm" placeholder="Chercher par nom">
+                    </th>
+                    <th scope="col">
+                        <input type="number" name="postal_code" placeholder="Chercher par code postal">
+                    </th>
+                    <th scope="col">
+                        <input type="text" name="nom_reg" placeholder="Chercher par région">
+                    </th>
+                    <th scope="col">
+                        <input type="text" name="nom_dept" placeholder="Chercher par département">
+                    </th>
+                    <th></th>
+                    <th scope="col">
+                        <input type="submit" value="Rechercher">
+                    </th>
+                </tr>
+            </form>
+
         {% for city in cities %}
             <tr>
                 <th scope="col">{{ city.id_city }}</th>
                 <td>{% autoescape false %}{{ city.nom_comm }}{% endautoescape %}</td>
                 <td>{{ city.postal_code }}</td>
+                <td>{% autoescape false %}{{ city.nom_reg }}{% endautoescape %}</td>
+                <td>{% autoescape false %}{{ city.nom_dept }}{% endautoescape %}</td>
                 <td>{{ city.product_count }}</td>
                 <td>{{ city.seller_count }}</td>
+                {# AVORTED
                 <td>Dernière action</td>
                 <td>
                     <div class="form-check form-switch">
@@ -43,8 +74,46 @@
                         {% endif %}
                     </div>
                 </td>
+                #}
             </tr>
         {% endfor %}
         </tbody>
     </table>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            {% if currentPage != 1 %}
+                <li class="page-item">
+                    <a class="page-link" aria-label="Previous"
+                       href="{{ path('joi_admin_city_detail') }}&p={{ currentPage - 1 }}
+                    ">
+                        <span aria-hidden="true">&laquo;</span>
+                        <span class="sr-only">Précédente</span>
+                    </a>
+                </li>
+            {% endif %}
+            {% for key, page in pages %}
+                <li class="page-item">
+                    {% if page != '...' %}
+                        <a class="page-link {%  if currentPage == page %}active{% endif %}"
+                           href="{{ path('joi_admin_city_detail') }}&p={{ page }}
+                        ">
+                            {{ page }}
+                        </a>
+                    {% else %}
+                        <a class="page-link disabled">{{ page }}</a>
+                    {% endif %}
+                </li>
+            {% endfor %}
+            {% if currentPage != max(pages) %}
+                <li class="page-item">
+                    <a class="page-link" aria-label="Next"
+                       href="{{ path('joi_admin_city_detail') }}&p={{ currentPage + 1 }}
+                    ">
+                        <span aria-hidden="true">&raquo;</span>
+                        <span class="sr-only">Suivante</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
 {% endblock %}
