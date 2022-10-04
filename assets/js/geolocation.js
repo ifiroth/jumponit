@@ -18,6 +18,7 @@ $(document).ready(function () {
     let oCollapseManualGeolocationAction = document.getElementById('collapseManualGeoLocationAction')
     let oCollapseManualGeolocation = document.getElementById('collapseManualGeoLocation');
     let oAutocompletionManualLocation = document.getElementById('autocompletionManualLocation')
+    let oModalBackDrop = document.getElementById('joiModalLocation')
 
     let aCitiesAutocompletion = []
 
@@ -50,6 +51,9 @@ $(document).ready(function () {
     console.log(sessionStorage.joi_postCode)
 
     if (pagesWithLocation.includes(prestashop.page.page_name) && !sessionStorage.joi_postCode) {
+
+        oModalBackDrop.style.backgroundColor = 'hsla(0, 0%, 0%, .5)'
+        oModalBackDrop.style.overflow = 'hidden';
 
         if (!("geolocation" in navigator)) {
 
@@ -153,14 +157,16 @@ $(document).ready(function () {
 
         } else {
 
+            let nom_comm = $("<textarea/>").html(data.nom_comm).text()
+
             oGeolocationState.classList.remove('alert-info', 'alert-warning')
             oGeolocationState.classList.add('alert-success')
-            oGeolocationState.innerText = 'Géolocalisation réussie'
+            oGeolocationState.innerText = 'Localisé à '+ nom_comm
 
             oSubmitLocation.classList.remove('disabled')
 
             oPostalCode.value = data.postal_code
-            oCity.value = $("<textarea/>").html(data.nom_comm).text()
+            oCity.value = nom_comm
             oRegion.value = $("<textarea/>").html(data.nom_reg).text()
             oDept.value = $("<textarea/>").html(data.nom_dept).text()
 

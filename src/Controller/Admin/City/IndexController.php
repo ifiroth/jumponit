@@ -55,9 +55,9 @@ class IndexController extends FrameworkBundleAdminController
 
             $this->addFlash('warning', 'Aucune ville importée');
         }
-        // TODO : remove commentary and restore redirection to feature reset
-        // return $this->redirectToRoute('joi_admin_city_reset_feature', ['step' => 0]);
-        return $this->redirectToRoute('joi_admin_city_detail');
+        // DONE : remove commentary and restore redirection to feature reset
+        return $this->redirectToRoute('joi_admin_city_reset_feature', ['step' => 0]);
+        // return $this->redirectToRoute('joi_admin_city_detail');
     }
 
     public function detailAction(Request $request) : Response

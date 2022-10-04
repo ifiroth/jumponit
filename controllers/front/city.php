@@ -48,8 +48,6 @@ class jumponitcityModuleFrontController extends ModuleFrontController
             $cityManager = new CityManager();
             $city = $cityManager->locateCityByPostalCode($postalCode);
 
-            $_SESSION['joi_postCode'] = $postalCode;
-
             if ($city) return \Tools::jsonEncode([$cityManager->saveCity($city, $this->context->customer->id)]);
 
             return \Tools::jsonEncode([null]);
