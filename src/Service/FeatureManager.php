@@ -17,16 +17,16 @@ class FeatureManager {
         $feature = new \Feature();
         $feature->name = [ $this->lang_id => \Configuration::get($this->mod_prefix .'feature_label') ];
         $feature->position = \Feature::getHigherPosition() + 1;
-        $result = $feature->add();
+        $feature->add();
 
         \Configuration::updateValue($this->mod_prefix .'feature_id', $feature->id);
+        $this->id = $feature->id;
 
-        return $result;
+        return $feature->id;
     }
 
     public function deleteFeature() : bool
     {
-
         if ($this->id) {
             $feature = new \Feature($this->id);
             return $feature->delete();
@@ -37,31 +37,22 @@ class FeatureManager {
         }
     }
 
-    public function resetFeatureValue() : ?int
+    public function resetFeatureValue(int $start = 0) : ?int
     {
-        if ($this->id) {
+        $cityManger = new CityManager();
+        $cities = $cityManger->getCities([], [], 0, 0);
 
-            $this->deleteFeature();
-            $this->initFeature();
+        for ($i = $start; $i < count($cities); $i++) {
 
-            $cityManger = new CityManager();
-            $cities = $cityManger->getCities([], [], 0, 0);
+            if (!$this->createValue($cities[$i]['nom_comm'], $cities[$i]['id_city'])) throw new \PrestaShopException('Impossible de lier la ville '. $cities[$i]['nom_comm']);
 
-            dump($cities);
-            $i = 0;
+            if ($i == (count($cities) - 1)) return null;
 
-            foreach ($cities as $city) {
-
-                $this->createValue($city['nom_comm'], $city['id_city']);
-                $i++;
-            }
-
-            return $i;
-
-        } else {
-
-            return null;
+            // On évite le 504 timeOut en décomposant la création de feature value en plusieurs étapes
+            if ($i >= (10000 + $start)) return $i;
         }
+
+        return $i;
     }
 
     public function getFeatureValueIdByName(string $name) : ?int
@@ -76,12 +67,22 @@ class FeatureManager {
         return false;
     }
 
+    /**
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     */
     public function createValue(string $name, int $id_city) : ?int
     {
         $featurevalue = new \FeatureValue;
         $featurevalue->id_feature = $this->id;;
-        $featurevalue->value = [ $this->lang_id => $name ];
-        $featurevalue->add();
+        $featurevalue->value = [ $this->lang_id => html_entity_decode($name, ENT_QUOTES) ];
+
+        try {
+            if (!$featurevalue->add()) return null;
+
+        } catch (\PrestaShopDatabaseException|\PrestaShopException $e) {
+            return null;
+        }
 
         $cityManager = new CityManager();
         $cityManager->linkFeatureToCity($id_city, $featurevalue->id);

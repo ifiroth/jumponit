@@ -22,7 +22,8 @@ class SqlManager {
                 `statut` VARCHAR(255) NOT NULL,
                 `code_reg` INT NOT NULL,
                 `code_dept` INT NOT NULL,
-                `geo_center` TEXT NOT NULL,
+                `geo_lat` DECIMAL(24, 22) NOT NULL,
+                `geo_long` DECIMAL(24, 22) NOT NULL,
                 `geo_shape` TEXT NOT NULL,
                 PRIMARY KEY (`id_city`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

@@ -16,12 +16,27 @@ class IndexController extends FrameworkBundleAdminController
         $this->cityManager = new CityManager();
     }
 
-    public function resetFeatureAction() : Response
+    public function resetFeatureAction($step) : Response
     {
         $featureManager = new FeatureManager();
-        $featureManager->resetFeatureValue();
 
-        return $this->redirectToRoute('joi_admin_city_detail');
+        if ($step == 0) {
+            $featureManager->deleteFeature();
+            $featureManager->initFeature();
+        }
+
+        $i = $featureManager->resetFeatureValue($step);
+
+        if ($i) {
+
+            return $this->redirectToRoute('joi_admin_city_reset_feature', ['step' => $i]);
+
+        } else {
+
+            if ($step) $this->addFlash('success', $step .' villes caractérisées.');
+            else $this->addFlash('warning', 'Aucune ville caractérisée.');
+            return $this->redirectToRoute('joi_admin_city_detail');
+        }
     }
 
     public function importAction() : Response
@@ -40,8 +55,9 @@ class IndexController extends FrameworkBundleAdminController
 
             $this->addFlash('warning', 'Aucune ville importée');
         }
-
-        return $this->redirectToRoute('joi_admin_city_reset_feature');
+        // TODO : remove commentary and restore redirection to feature reset
+        // return $this->redirectToRoute('joi_admin_city_reset_feature', ['step' => 0]);
+        return $this->redirectToRoute('joi_admin_city_detail');
     }
 
     public function detailAction(Request $request) : Response

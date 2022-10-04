@@ -5,87 +5,205 @@
 
 */
 
-if ("geolocation" in navigator){
+$(document).ready(function () {
 
-    //navigator.geolocation.getCurrentPosition(success, error);
+    pagesWithLocation = [ 'index', 'product', 'category', 'search' ]
 
-    // Aix en provence
-    position = {
-        coords: {
-            latitude: 43.5312,
-            longitude: 5.4554
-        }
+    let oSubmitLocation = document.getElementById('submitLocation')
+    let oPostalCode = document.getElementById('postalCodeDataList')
+    let oCity = document.getElementById('cityDataList')
+    let oRegion = document.getElementById('regionDataList')
+    let oDept = document.getElementById('deptDataList')
+    let oGeolocationState = document.getElementById('modal-geolocation-state')
+    let oCollapseManualGeolocationAction = document.getElementById('collapseManualGeoLocationAction')
+    let oCollapseManualGeolocation = document.getElementById('collapseManualGeoLocation');
+    let oAutocompletionManualLocation = document.getElementById('autocompletionManualLocation')
+
+    let aCitiesAutocompletion = []
+
+    console.log(prestashop.page.page_name)
+
+    oPostalCode.addEventListener('keyup', function () {
+        getCityByPostalCode(this.value)
+    })
+
+    oCollapseManualGeolocationAction.addEventListener('click', toggleManualGeolocation)
+    oCollapseManualGeolocationAction.addEventListener('mouseover', function() { this.style.cursor = "pointer" } )
+
+    function toggleManualGeolocation () {
+
+        oCollapseManualGeolocation.classList.toggle('d-none')
+        oCollapseManualGeolocation.classList.toggle('d-inline')
     }
 
-	console.log("Locating")
+    let url = document.getElementById('ajaxLink').value
 
-    success(position)
+    oSubmitLocation.addEventListener('click', (e) => {
 
-    function success(position) {
+        saveCity()
+    })
+
+    $('#joiModalLocation').modal({
+        backdrop: false,
+    })
+
+    console.log(sessionStorage.joi_postCode)
+
+    if (pagesWithLocation.includes(prestashop.page.page_name) && !sessionStorage.joi_postCode) {
+
+        if (!("geolocation" in navigator)) {
+
+            geolocationError()
+
+        } else {
+
+            oGeolocationState.innerText = "Localisation en cours...";
+            oGeolocationState.classList.remove('alert-success', 'alert-warning')
+            oGeolocationState.classList.add('alert-info')
+
+            let options = {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+            }
+
+            navigator.geolocation.getCurrentPosition(geolocationSuccess, geolocationError, options);
+        }
+    } else {
+
+        $('#joiModalLocation').modal('hide')
+    }
+
+    function geolocationSuccess(position) {
 
         const lat = position.coords.latitude
         const long = position.coords.longitude
 
+        oGeolocationState.innerText = "Localisation en cours...";
+        oGeolocationState.classList.remove('alert-success', 'alert-warning')
+        oGeolocationState.classList.add('alert-info')
 
-        console.log('Latitude : ' + lat +"\n"+'Longitude : '+ long)
+        getCityByGPS(position.coords)
+
     }
 
-    function error(position) {
-        console.log('Erreur lors de la récupération des données')
+    function geolocationError() {
+
+        oGeolocationState.innerText = "Impossible de récupérer vos données de localisation."
+        oGeolocationState.classList.remove('alert-success', 'alert-info')
+        oGeolocationState.classList.add('alert-warning')
     }
 
+    function disableGeoSubmit() {
 
+        oSubmitLocation.classList.add('disabled')
+        oPostalCode.classList.remove('is-valid')
+    }
 
-}else{
+    function getCityByPostalCode(postalCode) {
 
-	console.log("Geolocation not available!")
-}
+        disableGeoSubmit()
+        console.log('Recherche par code postal')
 
-/**
- * FROM : https://www.algorithms-and-technologies.com/point_in_polygon/javascript
- * Performs the even-odd-rule Algorithm (a raycasting algorithm) to find out whether a point is in a given polygon.
- * This runs in O(n) where n is the number of edges of the polygon.
- *
- * @param {Array} polygon an array representation of the polygon where polygon[i][0] is the x Value of the i-th point and polygon[i][1] is the y Value.
- * @param {Array} point   an array representation of the point where point[0] is its x Value and point[1] is its y Value
- * @return {boolean} whether the point is in the polygon (not on the edge, just turn < into <= and > into >= for that)
- */
+        oPostalCode.value = postalCode.replace(/\D/g, '')
 
-const pointInPolygon = function (polygon, point) {
-    //A point is in a polygon if a line from the point to infinity crosses the polygon an odd number of times
-    let odd = false;
-    //For each edge (In this case for each point of the polygon and the previous one)
-    for (let i = 0, j = polygon.length - 1; i < polygon.length; i++) {
-        //If a line from the point into infinity crosses this edge
-        if (((polygon[i][1] > point[1]) !== (polygon[j][1] > point[1])) // One point needs to be above, one below our y coordinate
-            // ...and the edge doesn't cross our Y corrdinate before our x coordinate (but between our x coordinate and infinity)
-            && (point[0] < ((polygon[j][0] - polygon[i][0]) * (point[1] - polygon[i][1]) / (polygon[j][1] - polygon[i][1]) + polygon[i][0]))) {
-            // Invert odd
-            odd = !odd;
+        if (postalCode.length === 5) {
+
+            $.ajax({
+                type: "GET",
+                url: url,
+                data: {
+                    postalCode: postalCode,
+                    action: 'defineCity',
+                    ajax: true
+                },
+                success : (data) => defineCity(JSON.parse(data)),
+                error : () => geolocationError()
+            })
         }
-        j = i;
+    }
+
+    function getCityByGPS(coords) {
+
+        disableGeoSubmit()
+        console.log('Recherche par coordonée GPS')
+
+        oGeolocationState.classList.remove('alert-success', 'alert-warning')
+        oGeolocationState.classList.add('alert-info')
+        oGeolocationState.innerText = "Récupération du nom de la commune...";
+
+        $.ajax({
+            type: "GET",
+            url: url,
+            data: {
+                lat: coords.latitude,
+                long: coords.longitude,
+                action: 'defineCity',
+                ajax: true
+            },
+            success : (data) => defineCity(JSON.parse(data)),
+            error : () => geolocationError()
+        })
+    }
+
+    function defineCity(data) {
+
+        if (!data) {
+
+            geolocationError()
+
+        } else {
+
+            oGeolocationState.classList.remove('alert-info', 'alert-warning')
+            oGeolocationState.classList.add('alert-success')
+            oGeolocationState.innerText = 'Géolocalisation réussie'
+
+            oSubmitLocation.classList.remove('disabled')
+
+            oPostalCode.value = data.postal_code
+            oCity.value = $("<textarea/>").html(data.nom_comm).text()
+            oRegion.value = $("<textarea/>").html(data.nom_reg).text()
+            oDept.value = $("<textarea/>").html(data.nom_dept).text()
+
+            oPostalCode.classList.add('is-valid')
+            oCity.classList.add('is-valid')
+            oRegion.classList.add('is-valid')
+            oDept.classList.add('is-valid')
+        }
+    }
+
+    function saveCity(postalCode) {
+
+        // TODO : Implement save method
+        console.log('Sauvegarde')
+
+        disableGeoSubmit()
+
+        oGeolocationState.classList.remove('alert-success', 'alert-warning')
+        oGeolocationState.classList.add('alert-info')
+        oGeolocationState.innerText = "Définition de la ville...";
+
+        $.ajax({
+            type: "GET",
+            url: url,
+            data: {
+                postalCode: postalCode,
+                action: 'saveCity',
+                ajax: true
+            },
+            success : (data) => isSavedCity(JSON.parse(data)),
+            error : () => geolocationError()
+        })
+    }
+
+    function isSavedCity(data) {
+
+        oGeolocationState.classList.remove('alert-info', 'alert-warning')
+        oGeolocationState.classList.add('alert-success')
+        oGeolocationState.innerText = "Position définie";
+
+        setTimeout(() => {
+            $('#joiModalLocation').modal('hide')
+        }, 2000)
 
     }
-    //If the number of crossings was odd, the point is in the polygon
-    return odd;
-};
-
-async function getCityPolygons(step)
-{
-    return new Promise ((resolve, reject) => {
-        let xhr = new XMLHttpRequest()
-        xhr.onreadystatechange = () => {
-            if (xhr.readyState == 4) {
-                if (xhr.status == 200) {
-
-                    resolve(xhr)
-                } else {
-
-                    reject(xhr)
-                }
-            }
-        }
-        xhr.open('get', 'http://http://www.cxse4072.odns.fr/='+ region)
-        xhr.send()
-    })
-}
+})

@@ -2,6 +2,7 @@
 
 namespace JOI\Service;
 
+
 class CityManager {
 
     public function __construct() {
@@ -108,6 +109,22 @@ class CityManager {
             $db = \Db::getInstance();
             $fields = $city['fields'];
 
+            $shape = $fields['geo_shape']['coordinates'];
+
+            while (is_array($shape[0])) {
+
+                $previousArray = $shape;
+                $shape = $shape[0];
+
+                if (!is_array($shape[0]))
+                {
+                    $shape = $previousArray;
+                    break;
+                }
+            }
+
+            // TODO : Switch to Neo4j to gain database access time
+
             $db->insert('joi_city', [
                 'postal_code' => (int) $fields['postal_code'],
                 'code_dept' => (int) $fields['code_dept'],
@@ -115,8 +132,9 @@ class CityManager {
                 'nom_comm' => htmlentities($fields['nom_comm'], ENT_QUOTES),
                 'nom_dept' => htmlentities($fields['nom_dept'], ENT_QUOTES),
                 'nom_reg' => htmlentities($fields['nom_region'], ENT_QUOTES),
-                'geo_center' => json_encode($fields['geo_point_2d']),
-                'geo_shape' => json_encode($fields['geo_shape']['coordinates']),
+                'geo_lat' => $fields['geo_point_2d'][0],
+                'geo_long' => $fields['geo_point_2d'][1],
+                'geo_shape' => json_encode($shape),
                 'statut' => htmlentities($fields['statut'], ENT_QUOTES),
             ]);
 
@@ -171,33 +189,74 @@ class CityManager {
         return $result['nom_comm'];
     }
 
-    public function getCityByArea(string $step, int $areaCode) {
+    public function getCitiesByArea(float $range, float $long, float $lat) {
 
         $sql = new \DbQuery();
 
-        $sql->select('c.`nom_comm`');
         $sql->from('joi_city', 'c');
 
-        switch ($step) {
-            case 'dept':
-                $sql->where('c.`code_dept` = '. $areaCode);
-                break;
+        $sql->select('c.`nom_comm`, c.`geo_shape`, c.`postal_code`, c.`geo_lat`, c.`geo_long`, c.`nom_dept`, c.`nom_reg`');
+        $sql->where('
+            (c.`geo_lat` BETWEEN '. $lat * ( 1 - $range ) .' AND '. $lat * ( 1 + $range ) .')
+        AND (c.`geo_long` BETWEEN '. $long * ( 1 - $range ) .' AND '. $long * ( 1 + $range ) .')
+        ');
+        $sql->orderBy('c.`nom_comm`');
 
-            case 'reg':
-                $sql->where('c.`code_reg` = '. $areaCode);
-                break;
-
-            default:
-                $sql->where();
-                break;
-        }
-
-        $result = \Db::getInstance()->getRow($sql);
-
-        return $result['nom_comm'];
+        return \Db::getInstance()->executeS($sql);
     }
 
-    public function getCityIdByName($name) : ?int {
+    public function locateCityByPostalCode(int $postalCode): ?array {
+
+        $sql = new \DbQuery();
+
+        $sql->from('joi_city', 'c');
+
+        $sql->select('c.`nom_comm`, c.`geo_shape`, c.`postal_code`, c.`geo_lat`, c.`geo_long`, c.`nom_dept`, c.`nom_reg`');
+        $sql->where('c.`postal_code` = '. $postalCode);
+
+        return \Db::getInstance()->getRow($sql) ?: null;
+
+    }
+
+    public function locateCityByGPS(array $coords): ?array {
+
+        $cities = $this->getCitiesByArea(.07, $coords[0], $coords[1]);
+
+        foreach ($cities as $city) {
+
+            if ($this->pointInPolygon(json_decode($city['geo_shape']), $coords, $city['nom_comm'])) {
+
+                return $city;
+            }
+        }
+        return null;
+    }
+
+    public function pointInPolygon(?array $polygon, array $point, string $cityName) {
+
+        //A point is in a polygon if a line from the point to infinity crosses the polygon an odd number of times
+        $odd = false;
+        //For each edge (In this case for each point of the polygon and the previous one)
+        for ($i = 0, $j = count($polygon) - 1; $i < count($polygon); $i++) {
+            //If a line from the point into infinity crosses this edge
+
+            if ((($polygon[$i][1] > $point[1]) !== ($polygon[$j][1] > $point[1]))
+                // One point needs to be above, one below our y coordinate
+                // ...and the edge doesn't cross our Y coordinate before our x coordinate (but between our x coordinate
+                // and infinity)
+                && ($point[0] < (($polygon[$j][0] - $polygon[$i][0]) * ($point[1] - $polygon[$i][1]) /
+                        ($polygon[$j][1] - $polygon[$i][1]) + $polygon[$i][0]))) {
+                // Invert odd
+                $odd = !$odd;
+            }
+            $j = $i;
+        }
+            //If the number of crossings was odd, the point is in the polygon
+            return $odd;
+    }
+
+    public function getCityIdByName($name): ?int {
+
         $sql = new \DbQuery();
 
         $sql->select('c.`id_city`');
@@ -207,6 +266,21 @@ class CityManager {
         $result = \Db::getInstance()->getRow($sql);
 
         return $result ? $result['id_city'] : null;
+    }
+
+    public function saveCity(array $city, int $id_customer): bool {
+
+        if ($id_customer) {
+
+            return \Db::getInstance()->update(
+                'customer',
+                ['postocode' => $city['postcode']],
+                'id_customer ='. $id_customer,
+                1
+            );
+        }
+
+        return false;
     }
 
     /* AVORTED

@@ -92,8 +92,8 @@ class JumpOnIt extends Module
                 && $this->tabManager->install()
                 && $this->sqlManager->install()
                 && $this->featureManager->initFeature()
-                //&& $this->cityManager->importCities()
                 && $this->registerHook('displayHeader')
+                && $this->registerHook('displayTop')
                 //&& $this->registerHook('filterCategoryContent')
                 //&& $this->registerHook('filterProductSearch')
                 //&& $this->registerHook('productSearchProvider')
@@ -113,6 +113,7 @@ class JumpOnIt extends Module
             && $this->tabManager->uninstall()
             && $this->featureManager->deleteFeature()
             && $this->unregisterHook('displayHeader')
+            && $this->unregisterHook('displayTop')
             //&& $this->unregisterHook('filterCategoryContent')
             //&& $this->unregisterHook('filterProductSearch')
             //&& $this->unregisterHook('productSearchProvider')
@@ -130,7 +131,13 @@ class JumpOnIt extends Module
 
     public function hookDisplayHeader() {
 
-        $this->context->controller->addJS($this->_path .'assets/js/geolocation.js');
+        $this->context->controller->addJS($this->_path .'assets/js/geolocation.js', );
+
+    }
+
+    public function hookDisplayTop($params) {
+
+        return $this->display(__FILE__, 'template/hook/getLocation.tpl');
     }
 
     /*

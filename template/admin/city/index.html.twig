@@ -83,7 +83,7 @@
         <ul class="pagination justify-content-center">
             {% if currentPage != 1 %}
                 <li class="page-item">
-                    <a class="page-link" aria-label="Previous"
+                    <a class="pagination-link" aria-label="Previous"
                        href="{{ path('joi_admin_city_detail') }}&p={{ currentPage - 1 }}
                     ">
                         <span aria-hidden="true">&laquo;</span>
@@ -94,7 +94,7 @@
             {% for key, page in pages %}
                 <li class="page-item">
                     {% if page != '...' %}
-                        <a class="page-link {%  if currentPage == page %}active{% endif %}"
+                        <a class="pagination-link {%  if currentPage == page %}active{% endif %}"
                            href="{{ path('joi_admin_city_detail') }}&p={{ page }}
                         ">
                             {{ page }}
@@ -106,7 +106,7 @@
             {% endfor %}
             {% if currentPage != max(pages) %}
                 <li class="page-item">
-                    <a class="page-link" aria-label="Next"
+                    <a class="pagination-link" aria-label="Next"
                        href="{{ path('joi_admin_city_detail') }}&p={{ currentPage + 1 }}
                     ">
                         <span aria-hidden="true">&raquo;</span>

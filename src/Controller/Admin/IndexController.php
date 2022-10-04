@@ -10,7 +10,7 @@ use JOI\Service\ProductManager;
 
 class IndexController extends FrameworkBundleAdminController
 {
-    public function __construct ()
+    public function __construct()
     {
         $this->mod_prefix = \Configuration::get('module_prefix');
     }

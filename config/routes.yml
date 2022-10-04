@@ -64,14 +64,15 @@ joi_admin_city_import:
 #        id_city: '\d+'
 
 joi_admin_city_reset_feature:
-    path: joi/admin/city/reset/feature
+    path: joi/admin/city/reset/feature/{step}
     methods: [ GET ]
     defaults:
         _controller: 'JOI\Controller\Admin\City\IndexController::resetFeatureAction'
+    requirements:
+        step: '\d+'
 
-
-joi_city_list:
-    path: joi/city/list/{step}/{area}
+joi_ajax_city:
+    path: joi/ajax/city/search/{step}/{lat}/{long}
     methods: [ GET ]
     defaults:
-        _controller: 'JOI\Controller\Front\City\IndexController::listAction'
+        _controller: 'JOI\Controller\Ajax\City\IndexController::searchAction'
