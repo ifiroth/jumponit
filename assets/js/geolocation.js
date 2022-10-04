@@ -61,9 +61,8 @@ $(document).ready(function () {
 
         } else {
 
+            updateGeolocationState(oGeolocationState, 'info')
             oGeolocationState.innerText = "Localisation en cours...";
-            oGeolocationState.classList.remove('alert-success', 'alert-warning')
-            oGeolocationState.classList.add('alert-info')
 
             let options = {
                 enableHighAccuracy: true,
@@ -82,19 +81,33 @@ $(document).ready(function () {
         const lat = position.coords.latitude
         const long = position.coords.longitude
 
+        updateGeolocationState(oGeolocationState, 'info')
         oGeolocationState.innerText = "Localisation en cours...";
-        oGeolocationState.classList.remove('alert-success', 'alert-warning')
-        oGeolocationState.classList.add('alert-info')
 
         getCityByGPS(position.coords)
+    }
 
+    function updateGeolocationState(element, state, img = null) {
+
+        let states = ['info', 'warning', 'success', 'danger']
+        const index =  states.indexOf(state)
+
+        if (index > -1) {
+            formatedStates = states.map(s => 'alert-'+ s)
+            element.classList.add(formatedStates[index])
+            formatedStates.splice(index, 1)
+            element.classList.remove(...formatedStates)
+        }
+
+        if (img) {
+            element.background
+        }
     }
 
     function geolocationError() {
 
+        updateGeolocationState(oGeolocationState, 'warning')
         oGeolocationState.innerText = "Impossible de récupérer vos données de localisation."
-        oGeolocationState.classList.remove('alert-success', 'alert-info')
-        oGeolocationState.classList.add('alert-warning')
     }
 
     function disableGeoSubmit() {
@@ -131,8 +144,7 @@ $(document).ready(function () {
         disableGeoSubmit()
         console.log('Recherche par coordonée GPS')
 
-        oGeolocationState.classList.remove('alert-success', 'alert-warning')
-        oGeolocationState.classList.add('alert-info')
+        updateGeolocationState(oGeolocationState, 'info')
         oGeolocationState.innerText = "Récupération du nom de la commune...";
 
         $.ajax({
@@ -159,12 +171,12 @@ $(document).ready(function () {
 
             let nom_comm = $("<textarea/>").html(data.nom_comm).text()
 
-            oGeolocationState.classList.remove('alert-info', 'alert-warning')
-            oGeolocationState.classList.add('alert-success')
+            updateGeolocationState(oGeolocationState, 'success')
             oGeolocationState.innerText = 'Localisé à '+ nom_comm
 
             oSubmitLocation.classList.remove('disabled')
 
+            /* TODO: Wait for client validation
             oPostalCode.value = data.postal_code
             oCity.value = nom_comm
             oRegion.value = $("<textarea/>").html(data.nom_reg).text()
@@ -174,6 +186,7 @@ $(document).ready(function () {
             oCity.classList.add('is-valid')
             oRegion.classList.add('is-valid')
             oDept.classList.add('is-valid')
+            */
         }
     }
 
@@ -184,8 +197,7 @@ $(document).ready(function () {
 
         disableGeoSubmit()
 
-        oGeolocationState.classList.remove('alert-success', 'alert-warning')
-        oGeolocationState.classList.add('alert-info')
+        updateGeolocationState(oGeolocationState, 'info')
         oGeolocationState.innerText = "Définition de la ville...";
 
         $.ajax({
@@ -203,8 +215,7 @@ $(document).ready(function () {
 
     function isSavedCity(data) {
 
-        oGeolocationState.classList.remove('alert-info', 'alert-warning')
-        oGeolocationState.classList.add('alert-success')
+        updateGeolocationState(oGeolocationState, 'success')
         oGeolocationState.innerText = "Position définie";
 
         setTimeout(() => {

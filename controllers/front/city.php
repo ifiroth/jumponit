@@ -19,14 +19,14 @@ class jumponitcityModuleFrontController extends ModuleFrontController
         $long = (float) Tools::getValue('long') ?? false;
         $postalCode = (int) Tools::getValue('postalCode') ?? false;
 
-        if ($lat != 0 && $long != 0) {
+        if ($lat && $long) {
 
             $cityManager = new CityManager();
             $city = $cityManager->locateCityByGPS([$long, $lat]);
 
             die(\Tools::jsonEncode($city));
 
-        } else if ($postalCode != 0) {
+        } else if ($postalCode) {
 
             $cityManager = new CityManager();
             $city = $cityManager->locateCityByPostalCode($postalCode);
