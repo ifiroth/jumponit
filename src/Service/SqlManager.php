@@ -6,11 +6,14 @@ use Db;
 
 class SqlManager {
 
-    private array $sql = [];
+    // TODO : Uncomment Database drop and creation
+
+    private array $sqlCreate = [];
+    private array $sqlAlter = [];
 
     public function __construct() {
 
-        $this->sql['city'] = "
+        $this->sqlCreate['city'] = "
             DROP TABLE IF EXISTS `". _DB_PREFIX_ ."joi_city`;
             CREATE TABLE IF NOT EXISTS `". _DB_PREFIX_ ."joi_city` (
                 `id_city` INT NOT NULL AUTO_INCREMENT,
@@ -29,7 +32,7 @@ class SqlManager {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
             ";
 
-        $this->sql['product_city'] = "
+        $this->sqlCreate['product_city'] = "
             DROP TABLE IF EXISTS `". _DB_PREFIX_ ."joi_product_city`;
             CREATE TABLE IF NOT EXISTS `". _DB_PREFIX_ ."joi_product_city` (
                 `id_city` INT,
@@ -38,7 +41,7 @@ class SqlManager {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
         ";
 
-        $this->sql['log_action'] = "
+        $this->sqlCreate['log_action'] = "
             DROP TABLE IF EXISTS `". _DB_PREFIX_ ."joi_log_action`;
             CREATE TABLE IF NOT EXISTS `". _DB_PREFIX_ ."joi_log_action` (
                 `id_log_action` INT NOT NULL AUTO_INCREMENT,
@@ -50,6 +53,10 @@ class SqlManager {
                 PRIMARY KEY (`id_log_action`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
             ";
+
+        $this->sqlAlter['customer'] = [
+            'add' => ['geo_code', 'INT'],
+        ];
     }
 
     public function install(): bool
@@ -57,7 +64,8 @@ class SqlManager {
 
         $i = 0;
 
-        foreach ($this->sql as $query)
+        /*
+        foreach ($this->sqlCreate as $query)
         {
             $result = Db::getInstance()->execute($query);
 
@@ -66,21 +74,65 @@ class SqlManager {
                 $i++;
             }
         }
+        */
+
+        foreach ($this->sqlAlter as $table => $instructions)
+        {
+            foreach ($instructions as $key => $value) {
+
+                $query = '';
+
+                switch($key) {
+                    case 'add':
+                        $query = 'ALTER TABLE `'. _DB_PREFIX_ . $table .'` ADD `'. $value[0] .'` '. $value[1];
+                        break;
+                }
+
+                $result = Db::getInstance()->execute($query);
+
+                if ($result) {
+                    $i++;
+                }
+            }
+        }
+
 
         return (bool) $i;
     }
 
     public function uninstall(): bool
     {
-
+        /*
         $query = '';
 
-        foreach ($this->sql as $key => $value) {
+        foreach ($this->sqlCreate as $key => $value) {
 
             $query .= 'DROP TABLE IF EXISTS `'. _DB_PREFIX_ . $key .'`;';
         }
 
+        $created = Db::getInstance()->execute($query);
+        */
+        $query = '';
+
+        foreach ($this->sqlAlter as $table => $instructions) {
+
+            foreach ($instructions as $key => $value) {
+
+                switch($key) {
+                    case 'add':
+                        $query .= 'ALTER TABLE `'. _DB_PREFIX_ . $table .'` DROP COLUMN '. $value[0] .';';
+                        break;
+                }
+            }
+        }
+
         return Db::getInstance()->execute($query);
+
+        /*
+        $altered = Db::getInstance()->execute($query);
+
+        return ($altered && $created);
+        */
     }
 
     public function reset($table) : bool {

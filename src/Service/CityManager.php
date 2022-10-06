@@ -2,6 +2,7 @@
 
 namespace JOI\Service;
 
+use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 
 class CityManager {
 
@@ -268,19 +269,19 @@ class CityManager {
         return $result ? $result['id_city'] : null;
     }
 
-    public function saveCity(array $city, int $id_customer): bool {
+    public function saveCity(array $city, ?int $id_customer): bool {
 
         if ($id_customer) {
 
             return \Db::getInstance()->update(
                 'customer',
-                ['postocode' => $city['postcode']],
+                ['geo_code' => $city['postal_code']],
                 'id_customer ='. $id_customer,
                 1
             );
         }
 
-        return false;
+        return true;
     }
 
     /* AVORTED

@@ -30,12 +30,12 @@ if (!defined('_PS_VERSION_')) {
 
 define('_MOD_PREFIX_', 'JOI_');
 
+use JOI\Service\CustomerManager;
 use JOI\Service\SqlManager;
 use JOI\Service\TabManager;
 use JOI\Service\CityManager;
 use JOI\Service\FeatureManager;
 use JOI\Service\ProductManager;
-use Prestashop\Prestashop\Adatper\SymfonyContainer;
 
 require_once __DIR__.'/vendor/autoload.php';
 
@@ -121,21 +121,47 @@ class JumpOnIt extends Module
             ;
     }
 
-    public function getContent() {
-
+    public function getContent()
+    {
         $output = 'Id de l\'attribut : '. Configuration::get(_MOD_PREFIX_.'feature_id') .'<br>';
 
         return $output;
     }
 
 
-    public function hookDisplayHeader() {
-
+    public function hookDisplayHeader()
+    {
         $this->context->controller->addJS($this->_path .'assets/js/geolocation.js', );
-
     }
 
-    public function hookDisplayTop($params) {
+    public function hookDisplayTop($params)
+    {
+        // On regarde si on a un code postal enregistré dans l'user ou le cookie
+
+        if ($this->context->cookie->__isset('joi_postal_code')) {
+
+            $postalCode = (int) $this->context->cookie->__get('joi_postal_code');
+
+        } else {
+
+            if ($this->context->customer->id) {
+
+                $customerManager = new CustomerManager();
+                $postalCode = $customerManager->getPostalCode($this->context->customer->id);
+
+            } else {
+
+                $postalCode = 0;
+            }
+        }
+
+        $cityManager = new CityManager();
+        $geolocalisedCity = $cityManager->getCityNameByPostalCode($postalCode);
+
+        $this->context->smarty->assign([
+            'postal_code' => $postalCode,
+            'geolocalised_city' => $geolocalisedCity,
+        ]);
 
         return $this->display(__FILE__, 'template/hook/getLocation.tpl');
     }

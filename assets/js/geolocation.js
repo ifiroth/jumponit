@@ -19,10 +19,10 @@ $(document).ready(function () {
     let oCollapseManualGeolocation = document.getElementById('collapseManualGeoLocation');
     let oAutocompletionManualLocation = document.getElementById('autocompletionManualLocation')
     let oModalBackDrop = document.getElementById('joiModalLocation')
-
+    let postalCodeCookie = document.getElementById('postalCodeCookie').value
     let aCitiesAutocompletion = []
-
-    console.log(prestashop.page.page_name)
+    let oChangeCity = document.getElementById('joiChangeCity')
+    let oForgetCity = document.getElementById('joiForgetCity')
 
     oPostalCode.addEventListener('keyup', function () {
         getCityByPostalCode(this.value)
@@ -31,11 +31,34 @@ $(document).ready(function () {
     oCollapseManualGeolocationAction.addEventListener('click', toggleManualGeolocation)
     oCollapseManualGeolocationAction.addEventListener('mouseover', function() { this.style.cursor = "pointer" } )
 
+    oChangeCity.addEventListener('click', function () {
+        $('#joiModalLocation').modal('show')
+    })
+
+    oForgetCity.addEventListener('click', function () {
+        window.alert('Destruction de la ville -> A coder. Note à moi-même, cette fonction pourrait plaire a Poutine!')
+        /*
+        $.ajax({
+            type: "GET",
+            url: url,
+            data: {
+                postalCode: postalCode,
+                action: 'defineCity',
+                ajax: true
+            },
+            success : (data) => defineCity(JSON.parse(data)),
+            error : () => geolocationError()
+        })
+        */
+    })
+
     function toggleManualGeolocation () {
 
         oCollapseManualGeolocation.classList.toggle('d-none')
         oCollapseManualGeolocation.classList.toggle('d-inline')
     }
+
+
 
     let url = document.getElementById('ajaxLink').value
 
@@ -44,13 +67,11 @@ $(document).ready(function () {
         saveCity()
     })
 
-    $('#joiModalLocation').modal({
-        backdrop: false,
-    })
+    console.log(postalCodeCookie)
 
-    console.log(sessionStorage.joi_postCode)
+    if (pagesWithLocation.includes(prestashop.page.page_name) && parseInt(postalCodeCookie) === 0) {
 
-    if (pagesWithLocation.includes(prestashop.page.page_name) && !sessionStorage.joi_postCode) {
+        $('#joiModalLocation').modal('show')
 
         oModalBackDrop.style.backgroundColor = 'hsla(0, 0%, 0%, .5)'
         oModalBackDrop.style.overflow = 'hidden';
@@ -61,7 +82,7 @@ $(document).ready(function () {
 
         } else {
 
-            updateGeolocationState(oGeolocationState, 'info')
+            updateGeolocationState(oGeolocationState, 'info', 'locating', 'locating')
             oGeolocationState.innerText = "Localisation en cours...";
 
             let options = {
@@ -71,9 +92,6 @@ $(document).ready(function () {
 
             navigator.geolocation.getCurrentPosition(geolocationSuccess, geolocationError, options);
         }
-    } else {
-
-        $('#joiModalLocation').modal('hide')
     }
 
     function geolocationSuccess(position) {
@@ -81,7 +99,7 @@ $(document).ready(function () {
         const lat = position.coords.latitude
         const long = position.coords.longitude
 
-        updateGeolocationState(oGeolocationState, 'info')
+        updateGeolocationState(oGeolocationState, 'info', 'locating')
         oGeolocationState.innerText = "Localisation en cours...";
 
         getCityByGPS(position.coords)
@@ -97,10 +115,19 @@ $(document).ready(function () {
             element.classList.add(formatedStates[index])
             formatedStates.splice(index, 1)
             element.classList.remove(...formatedStates)
+
+            element.style.backgroundImage = "none"
+            element.style.paddingLeft = "1.25rem";
         }
 
         if (img) {
-            element.background
+            // TODO: replace gift with a free one
+            element.style.backgroundImage = "url('/modules/jumponit/assets/img/locating.gif')"
+            element.style.backgroundSize = "24px 37.5px"
+            element.style.backgroundRepeat = "no-repeat"
+            element.style.backgroundPositionX = "left"
+            element.style.backgroundPositionY = "center"
+            element.style.paddingLeft = "1.5rem";
         }
     }
 
@@ -175,14 +202,14 @@ $(document).ready(function () {
             oGeolocationState.innerText = 'Localisé à '+ nom_comm
 
             oSubmitLocation.classList.remove('disabled')
+            oPostalCode.value = data.postal_code
+            oPostalCode.classList.add('is-valid')
 
             /* TODO: Wait for client validation
-            oPostalCode.value = data.postal_code
             oCity.value = nom_comm
             oRegion.value = $("<textarea/>").html(data.nom_reg).text()
             oDept.value = $("<textarea/>").html(data.nom_dept).text()
 
-            oPostalCode.classList.add('is-valid')
             oCity.classList.add('is-valid')
             oRegion.classList.add('is-valid')
             oDept.classList.add('is-valid')
@@ -215,12 +242,20 @@ $(document).ready(function () {
 
     function isSavedCity(data) {
 
-        updateGeolocationState(oGeolocationState, 'success')
-        oGeolocationState.innerText = "Position définie";
+        if (data) {
 
-        setTimeout(() => {
-            $('#joiModalLocation').modal('hide')
-        }, 2000)
+            updateGeolocationState(oGeolocationState, 'success')
+            oGeolocationState.innerText = "Position définie";
 
+            setTimeout(() => {
+                $('#joiModalLocation').modal('hide')
+            }, 2000)
+
+        } else {
+
+            // TODO : update mail with the good one
+            updateGeolocationState(oGeolocationState, 'danger')
+            oGeolocationState.innerHTML = "Erreur lors de l'enregistrement du code postal. Veuillez <a href='mailto:info@jumponit-test.com'>contacter l'administrateur</a> ou vérifier la bonne saisie du code postal.";
+        }
     }
 })

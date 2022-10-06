@@ -3,7 +3,6 @@
 ini_set('display_errors', true);
 
 use JOI\Service\CityManager;
-use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 
 class jumponitcityModuleFrontController extends ModuleFrontController
 {
@@ -13,8 +12,8 @@ class jumponitcityModuleFrontController extends ModuleFrontController
 
     }
 
-    public function displayAjaxDefineCity() {
-
+    public function displayAjaxDefineCity()
+    {
         $lat = (float) Tools::getValue('lat') ?? false;
         $long = (float) Tools::getValue('long') ?? false;
         $postalCode = (int) Tools::getValue('postalCode') ?? false;
@@ -39,8 +38,8 @@ class jumponitcityModuleFrontController extends ModuleFrontController
         }
     }
 
-    public function displayAjaxSaveCity() {
-
+    public function displayAjaxSaveCity()
+    {
         $postalCode = (int) Tools::getValue('postalCode') ?? false;
 
         if ($postalCode != 0) {
@@ -48,7 +47,13 @@ class jumponitcityModuleFrontController extends ModuleFrontController
             $cityManager = new CityManager();
             $city = $cityManager->locateCityByPostalCode($postalCode);
 
-            if ($city) return \Tools::jsonEncode([$cityManager->saveCity($city, $this->context->customer->id)]);
+            if ($city) {
+
+                $this->context->cookie->__set('joi_postal_code', $postalCode);
+                $this->context->cookie->write();
+
+                return \Tools::jsonEncode([$cityManager->saveCity($city, $this->context->customer->id)]);
+            }
 
             return \Tools::jsonEncode([null]);
 
