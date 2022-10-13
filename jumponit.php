@@ -156,7 +156,12 @@ class JumpOnIt extends Module
         }
 
         $cityManager = new CityManager();
-        $geolocalisedCity = $cityManager->getCityNameByPostalCode($postalCode);
+        if ($postalCode)
+            $geolocalisedCity = $cityManager->getCityNameByPostalCode($postalCode);
+
+        else {
+            $geolocalisedCity = null;
+        }
 
         $this->context->smarty->assign([
             'postal_code' => $postalCode,
