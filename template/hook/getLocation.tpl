@@ -1,8 +1,7 @@
-<div>
+<div id="joi-banner">
     {if $postal_code != 0}
-        Localisé à {$geolocalised_city} town -
-        <span id="joiChangeCity">Changer la ville</span> -
-        <span id="joiForgetCity">Oublier la ville</span>
+        Localisé à {$geolocalised_city} -
+        <span id="joiChangeCity">Changer la ville</span>
     {/if}
 </div>
 <div class="modal fade" tabindex="-1" role="dialog" id="joiModalLocation" aria-hidden="true" data-backdrop="false">

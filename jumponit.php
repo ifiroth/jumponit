@@ -94,6 +94,8 @@ class JumpOnIt extends Module
                 && $this->featureManager->initFeature()
                 && $this->registerHook('displayHeader')
                 && $this->registerHook('displayTop')
+                && $this->registerHook('displayBanner')
+                && $this->registerHook('displayIqitMenu')
                 //&& $this->registerHook('filterCategoryContent')
                 //&& $this->registerHook('filterProductSearch')
                 //&& $this->registerHook('productSearchProvider')
@@ -113,7 +115,9 @@ class JumpOnIt extends Module
             && $this->tabManager->uninstall()
             && $this->featureManager->deleteFeature()
             && $this->unregisterHook('displayHeader')
+            && $this->unregisterHook('displayIqitMenu')
             && $this->unregisterHook('displayTop')
+            && $this->unregisterHook('displayBanner')
             //&& $this->unregisterHook('filterCategoryContent')
             //&& $this->unregisterHook('filterProductSearch')
             //&& $this->unregisterHook('productSearchProvider')
@@ -138,6 +142,76 @@ class JumpOnIt extends Module
     {
         // On regarde si on a un code postal enregistré dans l'user ou le cookie
 
+        if ($this->context->cookie->__isset('joi_postal_code')) {
+
+            $postalCode = (int) $this->context->cookie->__get('joi_postal_code');
+
+        } else {
+
+            if ($this->context->customer->id) {
+
+                $customerManager = new CustomerManager();
+                $postalCode = $customerManager->getPostalCode($this->context->customer->id);
+
+            } else {
+
+                $postalCode = 0;
+            }
+        }
+
+        $cityManager = new CityManager();
+        if ($postalCode)
+            $geolocalisedCity = $cityManager->getCityNameByPostalCode($postalCode);
+
+        else {
+            $geolocalisedCity = null;
+        }
+
+        $this->context->smarty->assign([
+            'postal_code' => $postalCode,
+            'geolocalised_city' => $geolocalisedCity,
+        ]);
+
+        return $this->display(__FILE__, 'template/hook/getLocation.tpl');
+    }
+
+    public function hookDisplayBanner(array $params) {
+        // On regarde si on a un code postal enregistré dans l'user ou le cookie
+
+        if ($this->context->cookie->__isset('joi_postal_code')) {
+
+            $postalCode = (int) $this->context->cookie->__get('joi_postal_code');
+
+        } else {
+
+            if ($this->context->customer->id) {
+
+                $customerManager = new CustomerManager();
+                $postalCode = $customerManager->getPostalCode($this->context->customer->id);
+
+            } else {
+
+                $postalCode = 0;
+            }
+        }
+
+        $cityManager = new CityManager();
+        if ($postalCode)
+            $geolocalisedCity = $cityManager->getCityNameByPostalCode($postalCode);
+
+        else {
+            $geolocalisedCity = null;
+        }
+
+        $this->context->smarty->assign([
+            'postal_code' => $postalCode,
+            'geolocalised_city' => $geolocalisedCity,
+        ]);
+
+        return $this->display(__FILE__, 'template/hook/getLocation.tpl');
+    }
+
+    public function hookDisplayIqitMenu(array $params) {
         if ($this->context->cookie->__isset('joi_postal_code')) {
 
             $postalCode = (int) $this->context->cookie->__get('joi_postal_code');
