@@ -12,7 +12,7 @@ class SqlManager {
     private array $sqlAlter = [];
 
     public function __construct() {
-
+        /*
         $this->sqlCreate['city'] = "
             DROP TABLE IF EXISTS `". _DB_PREFIX_ ."joi_city`;
             CREATE TABLE IF NOT EXISTS `". _DB_PREFIX_ ."joi_city` (
@@ -40,7 +40,17 @@ class SqlManager {
                 PRIMARY KEY (`id_city`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
         ";
+        */
 
+        $this->sqlCreate['qrcode'] = "
+            DROP TABLE IF EXISTS `". _DB_PREFIX_ ."joi_qrcode`;
+            CREATE TABLE IF NOT EXISTS `". _DB_PREFIX_ ."joi_qrcode` (
+                `id_qrcode` INT,
+                `url` VARCHAR(255),
+                PRIMARY KEY (`id_qrcode`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        ";
+        /*
         $this->sqlCreate['log_action'] = "
             DROP TABLE IF EXISTS `". _DB_PREFIX_ ."joi_log_action`;
             CREATE TABLE IF NOT EXISTS `". _DB_PREFIX_ ."joi_log_action` (
@@ -57,6 +67,7 @@ class SqlManager {
         $this->sqlAlter['customer'] = [
             'add' => ['geo_code', 'INT'],
         ];
+        */
     }
 
     public function install(): bool

@@ -76,3 +76,16 @@ joi_ajax_city:
     methods: [ GET ]
     defaults:
         _controller: 'JOI\Controller\Ajax\City\IndexController::searchAction'
+
+
+joi_admin_qrcode:
+    path: joi/admin/qrcode
+    methods: [ GET ]
+    defaults:
+        _controller: 'JOI\Controller\Admin\Qrcode\IndexController::indexAction'
+
+joi_admin_qrcode_create:
+    path: joi/admin/qrcode/{link}
+    methods: [ GET ]
+    defaults:
+        _controller: 'JOI\Controller\Admin\Qrcode\IndexController::createAction'
